@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "PA3",
+			"Path": "C:\\RougeLike\\Source\\PA3.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "PA3Editor",
+			"Path": "C:\\RougeLike\\Source\\PA3Editor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}
