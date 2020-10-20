@@ -21,6 +21,9 @@ public:
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<ETileType> tileType;
 
+	UPROPERTY(VisibileAnywhere)
+		TArray<UTileComponent*> adjecentTiles;
+
 	UPROPERTY(EditAnywhere)
 		FVector2D roomLocation;
 

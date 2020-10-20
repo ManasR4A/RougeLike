@@ -288,29 +288,6 @@ void ATileBoardGenerator::Generate()
 	// Recursively Generate Room at the doors
 	else if (currentRoom->roomDeapth < victoryDeapth - 1)
 	{
-		//int32 rolls = 0;
-		//int32 randDoorIndex;
-		//UDoorComponent* door = currentRoom->doors[0];
-
-		//while (true && rolls < maxTries)
-		//{
-		//	randDoorIndex = UKismetMathLibrary::RandomIntegerInRange(1, currentRoom->doors.Num());
-		//	//randDoorIndex = FGenericPlatformMath::FloorToInt(FGenericPlatformMath::SRand() * currentRoom->doors.Num());
-		//	//randDoorIndex = randDoorIndex == 0 ? 1 : randDoorIndex; // to mitigate the condition where SRand returns 0
-		//	door = currentRoom->doors[randDoorIndex - 1];
-		//	if (door->connectedDoor)
-		//	{
-		//		rolls = 0;
-		//		break;
-		//	}
-		//	rolls++;
-		//}
-		//if (door->connectedDoor)
-		//{
-		//	currentRoom = door->connectedDoor->parentTile->parentRoom;
-		//	Generate();
-		//}
-
 		int count = 0;
 		auto prevRoom = currentRoom;
 		for (auto door : prevRoom->doors)
