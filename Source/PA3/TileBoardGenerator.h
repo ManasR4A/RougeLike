@@ -11,6 +11,7 @@ class UTileBoardComponent;
 class UDoorComponent;
 class URoomComponent;
 class UTileComponent;
+class UWallComponent;
 
 UCLASS()
 class PA3_API ATileBoardGenerator : public AActor
@@ -88,5 +89,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		URoomComponent* CreateRoomComponentFromString(FString roomName, FString roomData, FVector2D roomOriginBoardPosition);
+
+	UFUNCTION(BlueprintCallable)
+		int32 GetAdjesentTiles(UTileComponent* i_Tile);
 
 };

@@ -2,6 +2,7 @@
 #include "TileBoardGenerator.h"
 #include "RoomComponent.h"
 #include "DoorComponent.h"
+#include "WallComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
@@ -122,8 +123,23 @@ void ATileBoardGenerator::GenerateRoomAtDoor(UDoorComponent* i_DoorComponent, bo
 			continue;
 		}
 
+		// update connectedDoors
 		i_DoorComponent->connectedDoor = doorToConnect;
 		doorToConnect->connectedDoor = i_DoorComponent;
+
+		// update adjesent tiles
+		for (auto tile : spawnedRoom->tiles)
+		{
+			// Update adjesent tiles
+			int32 adjecenttilecount = GetAdjesentTiles(tile);
+
+			if (adjecenttilecount <= 0)
+				UE_LOG(LogTemp, Error, TEXT("No Adjesent Tiles!"));
+		}
+		i_DoorComponent->parentTile->adjecentTiles.Add(doorToConnect->parentTile);
+		doorToConnect->parentTile->adjecentTiles.Add(i_DoorComponent->parentTile);
+
+		// Finalize room and add to tileboard
 		spawnedRoom->roomDeapth = currentDepth;
 		tileBoard->rooms.Add(spawnedRoom);
 		UE_LOG(LogTemp, Warning, TEXT("New room spawned."));
@@ -436,6 +452,48 @@ URoomComponent* ATileBoardGenerator::CreateRoomComponentFromString(FString roomN
 
 }
 
+int32 ATileBoardGenerator::GetAdjesentTiles(UTileComponent* i_Tile)
+{
+	URoomComponent* parentRoom = i_Tile->parentRoom;
+
+	// get i_Tile coords
+	FVector tileCoords = FVector((parentRoom->roomOrigin + (i_Tile->roomLocation * worldScaler)), 0.f);
+
+	// get all 4 direction coords
+	FVector up, down, left, right;
+	up = tileCoords + FVector(0.f, worldScaler, 0.f);
+	down = tileCoords + FVector(0.f, -worldScaler, 0.f);
+	left = tileCoords + FVector(-worldScaler, 0.f, 0.f);
+	right = tileCoords + FVector(worldScaler, 0.f, 0.f);
+
+	// iterate through all tiles in parent room
+	for (auto tile : parentRoom->tiles)
+	{
+		if (tile == i_Tile)
+		{
+			continue;
+		}
+
+		// check if the tile is not wall
+		if (tile->GetOwner()->FindComponentByClass<UWallComponent>())
+		{
+			continue;
+		}
+			
+		// check if tile loc is any one of 4 coords
+		FVector tileLoc = tile->GetOwner()->GetActorLocation();
+		tileLoc.Z = 0.f;
+		if (tileLoc == up || tileLoc == down || tileLoc == right || tileLoc == left)
+		{
+			i_Tile->adjecentTiles.Add(tile);
+		}
+			
+	}
+
+	return i_Tile->adjecentTiles.Num();
+
+}
+
 UTileComponent* ATileBoardGenerator::SpawnTile(TEnumAsByte<ETileType> tileType, URoomComponent* parentRoom, FVector2D positionInRoom, FRotator tileRotation)
 {
 	if (!tileBPs.Contains(tileType))
@@ -453,6 +511,12 @@ UTileComponent* ATileBoardGenerator::SpawnTile(TEnumAsByte<ETileType> tileType, 
 	AActor* tileActor = GetWorld()->SpawnActor(tileBP.Get(), &tilePos, &tileRot);
 	UTileComponent* tile = tileActor->FindComponentByClass<UTileComponent>();
 	UDoorComponent* door = tileActor->FindComponentByClass<UDoorComponent>();
+	UWallComponent* wall = tileActor->FindComponentByClass<UWallComponent>();
+
+	if (wall)
+	{
+		wall->parentTile = tile;
+	}
 
 	// if the door component was found, update the door component datum
 	if (door)

@@ -21,7 +21,7 @@ public:
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<ETileType> tileType;
 
-	UPROPERTY(VisibileAnywhere)
+	UPROPERTY(EditAnywhere)
 		TArray<UTileComponent*> adjecentTiles;
 
 	UPROPERTY(EditAnywhere)
