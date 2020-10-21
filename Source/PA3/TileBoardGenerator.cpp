@@ -3,6 +3,8 @@
 #include "RoomComponent.h"
 #include "DoorComponent.h"
 #include "WallComponent.h"
+#include "GameManager.h"
+
 #include "Kismet/KismetMathLibrary.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
@@ -12,7 +14,7 @@ ATileBoardGenerator::ATileBoardGenerator()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
 }
 
 // Called when the game starts or when spawned
@@ -27,9 +29,11 @@ void ATileBoardGenerator::BeginPlay()
 		int randSeed = FGenericPlatformMath::SRand() * 3141598.f;
 		FGenericPlatformMath::SRandInit(randSeed);
 	}
-		
-
 	Generate();
+	
+	m_totalGeneratedRooms = tileBoard->rooms.Num();
+	gameManagerRef->bTileBoardGenerated = true;
+
 }
 
 TEnumAsByte<EDoorOrientation> ATileBoardGenerator::GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir)
@@ -127,18 +131,6 @@ void ATileBoardGenerator::GenerateRoomAtDoor(UDoorComponent* i_DoorComponent, bo
 		i_DoorComponent->connectedDoor = doorToConnect;
 		doorToConnect->connectedDoor = i_DoorComponent;
 
-		// update adjesent tiles
-		for (auto tile : spawnedRoom->tiles)
-		{
-			// Update adjesent tiles
-			int32 adjecenttilecount = GetAdjesentTiles(tile);
-
-			//if (adjecenttilecount <= 0)
-				// UE_LOG(LogTemp, Error, TEXT("No Adjesent Tiles!"));
-		}
-		i_DoorComponent->parentTile->adjecentTiles.Add(doorToConnect->parentTile);
-		doorToConnect->parentTile->adjecentTiles.Add(i_DoorComponent->parentTile);
-
 		// Finalize room and add to tileboard
 		spawnedRoom->roomDeapth = currentDepth;
 		tileBoard->rooms.Add(spawnedRoom);
@@ -215,6 +207,41 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// don't tick if the initial tileboard ins't generated
+	if (!gameManagerRef->bTileBoardGenerated)
+	{
+		return;
+	}
+
+	// go through the rooms (one room per frame) to address all the tiles within the room
+	if (!gameManagerRef->bTilesAddressed && m_currentRoomIndex <= m_totalGeneratedRooms)
+	{
+		currentRoom = tileBoard->rooms[m_currentRoomIndex];
+
+		for (UTileComponent* tile : currentRoom->tiles)
+		{
+			// Update adjesent tiles
+			int32 adjecenttilecount = GetAdjesentTiles(tile);
+
+			// if the current tile is a door that is connected to other room, update both door tiles' adjesent tiles
+			UDoorComponent* door = tile->GetOwner()->FindComponentByClass<UDoorComponent>();
+			if (door && door->connectedDoor)
+			{
+				tile->adjecentTiles.Add(door->connectedDoor->parentTile);
+				door->connectedDoor->parentTile->adjecentTiles.Add(tile);
+			}
+
+		}
+
+		// to go to next room in the tile board
+		m_currentRoomIndex++;
+
+		// if all rooms were visited to address the tiles, update bTilesAddressed
+		if (m_currentRoomIndex > m_totalGeneratedRooms)
+		{
+			gameManagerRef->bTilesAddressed = true;
+		}
+	}
 }
 
 void ATileBoardGenerator::Generate()
@@ -253,11 +280,11 @@ void ATileBoardGenerator::Generate()
 		tileBoard->rooms.Add(startRoom);
 		startRoom->roomDeapth = 0;
 		
-		// Update Adjesent Tiles
-		for (UTileComponent* tile : startRoom->tiles)
-		{
-			int32 adjesentTiles = GetAdjesentTiles(tile);
-		}
+		//// Update Adjesent Tiles
+		//for (UTileComponent* tile : startRoom->tiles)
+		//{
+		//	int32 adjesentTiles = GetAdjesentTiles(tile);
+		//}
 		
 		
 

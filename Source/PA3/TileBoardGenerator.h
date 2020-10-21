@@ -12,6 +12,7 @@ class UDoorComponent;
 class URoomComponent;
 class UTileComponent;
 class UWallComponent;
+class AGameManager;
 
 UCLASS()
 class PA3_API ATileBoardGenerator : public AActor
@@ -47,6 +48,9 @@ public:
 		int StartingRoomFromArray;
 
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
+		AGameManager* gameManagerRef;
+
+	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
 		TSubclassOf<class AActor> roomBP;
 
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
@@ -58,11 +62,22 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+#pragma region Private Vars
 	int32 tries = 0;
 	bool FirstRoom = true;
 	bool VictoryRoom = false;
 	int32 currentDepth = 0;
+
+	// used for generation of rooms and then poinint to the rooms for tile addressing
 	URoomComponent* currentRoom;
+
+	int32 m_totalGeneratedRooms = 0;
+	int32 m_currentRoomIndex = 0;
+
+#pragma endregion
+
+
 
 	TEnumAsByte<EDoorOrientation> GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir);
 	int32 hasOppositeDoorDIr(FString i_roomData, TEnumAsByte<EDoorOrientation> i_doorDir);
