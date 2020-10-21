@@ -103,7 +103,7 @@ void ATileBoardGenerator::GenerateRoomAtDoor(UDoorComponent* i_DoorComponent, bo
 
 		if (doorIndex == -1) // if no door suitable for current door in current room is found
 		{
-			UE_LOG(LogTemp, Error, TEXT("No Suitable Door Found in the random room"))
+			// UE_LOG(LogTemp, Error, TEXT("No Suitable Door Found in the random room"))
 				continue;
 		}
 
@@ -133,8 +133,8 @@ void ATileBoardGenerator::GenerateRoomAtDoor(UDoorComponent* i_DoorComponent, bo
 			// Update adjesent tiles
 			int32 adjecenttilecount = GetAdjesentTiles(tile);
 
-			if (adjecenttilecount <= 0)
-				UE_LOG(LogTemp, Error, TEXT("No Adjesent Tiles!"));
+			//if (adjecenttilecount <= 0)
+				// UE_LOG(LogTemp, Error, TEXT("No Adjesent Tiles!"));
 		}
 		i_DoorComponent->parentTile->adjecentTiles.Add(doorToConnect->parentTile);
 		doorToConnect->parentTile->adjecentTiles.Add(i_DoorComponent->parentTile);
@@ -252,6 +252,14 @@ void ATileBoardGenerator::Generate()
 		URoomComponent* startRoom = CreateRoomComponentFromString(FString("StartRoom"), roomString, FVector2D::ZeroVector);
 		tileBoard->rooms.Add(startRoom);
 		startRoom->roomDeapth = 0;
+		
+		// Update Adjesent Tiles
+		for (UTileComponent* tile : startRoom->tiles)
+		{
+			int32 adjesentTiles = GetAdjesentTiles(tile);
+		}
+		
+		
 
 		#pragma endregion
 
@@ -270,11 +278,11 @@ void ATileBoardGenerator::Generate()
 			if (connectedCount >= currentRoom->doors.Num())
 			{
 				currentDepth = currentRoom->roomDeapth;
-				UE_LOG(LogTemp, Warning, TEXT("All Door already connected."));
+				// UE_LOG(LogTemp, Warning, TEXT("All Door already connected."));
 				continue;
 			}
 				
-			UE_LOG(LogTemp, Warning, TEXT("Door already connected."));
+			// UE_LOG(LogTemp, Warning, TEXT("Door already connected."));
 			continue;
 		}
 			
@@ -531,7 +539,7 @@ UTileComponent* ATileBoardGenerator::SpawnTile(TEnumAsByte<ETileType> tileType, 
 
 		door->connectedDoor = nullptr;
 		parentRoom->doors.Add(door);
-		UE_LOG(LogTemp, Warning, TEXT("Door detected and added"));
+		// UE_LOG(LogTemp, Warning, TEXT("Door detected and added"));
 		
 	}
 
