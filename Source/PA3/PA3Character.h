@@ -14,6 +14,8 @@ class APA3Character : public ACharacter
 public:
 	APA3Character();
 
+	virtual void BeginPlay() override;
+
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -23,6 +25,9 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns CursorToWorld subobject **/
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
+
+	UPROPERTY(EditAnywhere)
+		class UTileComponent* currentTile;
 
 private:
 	/** Top down camera */

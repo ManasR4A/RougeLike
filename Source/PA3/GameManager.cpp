@@ -3,6 +3,11 @@
 
 #include "GameManager.h"
 
+#include "PA3Character.h"
+#include "TileBoardComponent.h"
+#include "TileComponent.h"
+#include "RoomComponent.h"
+
 // Sets default values
 AGameManager::AGameManager()
 {
@@ -13,17 +18,23 @@ AGameManager::AGameManager()
 	bGenerationComplete = false;
 }
 
+void AGameManager::PostTileBoardGeneration()
+{
+	playerCharecterRef->currentTile = tileBoard->rooms[0]->startTile;
+	playerCharecterRef->SetActorLocation(playerCharecterRef->currentTile->GetWorldLocation(WorldScaler));
+}
+
 // Called when the game starts or when spawned
 void AGameManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	playerCharecterRef = Cast<APA3Character>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 }
 
 // Called every frame
 void AGameManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
 

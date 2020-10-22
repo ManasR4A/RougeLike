@@ -1,6 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "PA3PlayerController.h"
+#include "TileComponent.h"
+
+
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
@@ -18,10 +21,10 @@ void APA3PlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	// keep updating the destination every tick while desired
-	if (bMoveToMouseCursor)
-	{
-		MoveToMouseCursor();
-	}
+	//if (bMoveToMouseCursor)
+	//{
+	//	MoveToMouseCursor();
+	//}
 }
 
 void APA3PlayerController::SetupInputComponent()
@@ -62,6 +65,38 @@ void APA3PlayerController::MoveToMouseCursor()
 		FHitResult Hit;
 		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
 
+		UTileComponent* HitTile = Hit.Actor.Get()->FindComponentByClass<UTileComponent>();
+
+		if (HitTile)
+		{
+			auto playerChar = Cast<APA3Character>(GetCharacter());
+			if (!playerChar)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Cast to player char failed."));
+				return;
+			}
+			UTileComponent* playerTile = playerChar->currentTile;
+
+			if (playerTile != HitTile)
+			{
+				if (playerTile->adjecentTiles.Contains(HitTile))
+				{
+					playerChar->SetActorLocation(HitTile->GetOwner()->GetActorLocation());
+					playerChar->currentTile = HitTile;
+					//UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, HitTile->GetOwner()->GetActorLocation());
+					//SetNewMoveDestination(HitTile->GetOwner()->GetActorLocation());
+					
+				}
+				else
+					UE_LOG(LogTemp, Warning, TEXT("Tile Not Adjesent."));
+
+			}
+			else
+				UE_LOG(LogTemp, Warning, TEXT("Same Tile as Current Tile"));
+		}
+		else
+			UE_LOG(LogTemp, Error, TEXT("Didn't hit a tile"));
+
 		if (Hit.bBlockingHit)
 		{
 			// We hit something, move there
@@ -92,7 +127,7 @@ void APA3PlayerController::SetNewMoveDestination(const FVector DestLocation)
 		float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
 
 		// We need to issue move command only if far enough in order for walk animation to play correctly
-		if ((Distance > 120.0f))
+		if ((Distance > 10.0f))
 		{
 			UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, DestLocation);
 		}
@@ -103,6 +138,7 @@ void APA3PlayerController::OnSetDestinationPressed()
 {
 	// set flag to keep updating destination until released
 	bMoveToMouseCursor = true;
+	MoveToMouseCursor();
 }
 
 void APA3PlayerController::OnSetDestinationReleased()

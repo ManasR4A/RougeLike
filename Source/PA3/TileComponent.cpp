@@ -2,6 +2,7 @@
 
 
 #include "TileComponent.h"
+#include "RoomComponent.h"
 
 // Sets default values for this component's properties
 UTileComponent::UTileComponent()
@@ -30,5 +31,11 @@ void UTileComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+FVector UTileComponent::GetWorldLocation(float WorldScaler)
+{
+	FVector WL = parentRoom->GetOwner()->GetActorLocation() + FVector(roomLocation * WorldScaler, 0.f);
+	return WL;
 }
 

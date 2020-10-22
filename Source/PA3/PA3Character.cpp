@@ -1,6 +1,10 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "PA3Character.h"
+
+#include "TileComponent.h"
+#include "TileBoardComponent.h"
+
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
@@ -55,6 +59,12 @@ APA3Character::APA3Character()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+}
+
+void APA3Character::BeginPlay()
+{
+
+
 }
 
 void APA3Character::Tick(float DeltaSeconds)

@@ -32,25 +32,6 @@ void URoomComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	// ...
 }
 
-UTileComponent* URoomComponent::GetTileLeft(UTileComponent* i_Tile)
-{
-	return nullptr;
-}
-
-UTileComponent* URoomComponent::GetTileRight(UTileComponent* i_Tile)
-{
-	return nullptr;
-}
-
-UTileComponent* URoomComponent::GetTileUp(UTileComponent* i_Tile)
-{
-	return nullptr;
-}
-
-UTileComponent* URoomComponent::GetTileDown(UTileComponent* i_Tile)
-{
-	return nullptr;
-}
 
 
 

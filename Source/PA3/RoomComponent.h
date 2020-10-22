@@ -30,11 +30,6 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UTileComponent* GetTileLeft(UTileComponent* i_Tile);
-	UTileComponent* GetTileRight(UTileComponent* i_Tile);
-	UTileComponent* GetTileUp(UTileComponent* i_Tile);
-	UTileComponent* GetTileDown(UTileComponent* i_Tile);
-
 	UPROPERTY(EditAnywhere)
 		FVector2D roomOrigin;
 
@@ -43,6 +38,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		TArray<UTileComponent*> tiles;
+
+	UPROPERTY(EditAnywhere)
+		UTileComponent* startTile;
 
 	UPROPERTY(EditAnywhere)
 		TArray<UDoorComponent*> doors;

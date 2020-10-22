@@ -33,7 +33,8 @@ void ATileBoardGenerator::BeginPlay()
 	
 	m_totalGeneratedRooms = tileBoard->rooms.Num();
 	gameManagerRef->bTileBoardGenerated = true;
-
+	gameManagerRef->tileBoard = tileBoard;
+	gameManagerRef->PostTileBoardGeneration();
 }
 
 TEnumAsByte<EDoorOrientation> ATileBoardGenerator::GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir)
@@ -214,7 +215,7 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 	}
 
 	// go through the rooms (one room per frame) to address all the tiles within the room
-	if (!gameManagerRef->bTilesAddressed && m_currentRoomIndex <= m_totalGeneratedRooms)
+	if (!gameManagerRef->bTilesAddressed && m_currentRoomIndex < m_totalGeneratedRooms)
 	{
 		currentRoom = tileBoard->rooms[m_currentRoomIndex];
 
@@ -279,14 +280,6 @@ void ATileBoardGenerator::Generate()
 		URoomComponent* startRoom = CreateRoomComponentFromString(FString("StartRoom"), roomString, FVector2D::ZeroVector);
 		tileBoard->rooms.Add(startRoom);
 		startRoom->roomDeapth = 0;
-		
-		//// Update Adjesent Tiles
-		//for (UTileComponent* tile : startRoom->tiles)
-		//{
-		//	int32 adjesentTiles = GetAdjesentTiles(tile);
-		//}
-		
-		
 
 		#pragma endregion
 
@@ -579,6 +572,10 @@ UTileComponent* ATileBoardGenerator::SpawnTile(TEnumAsByte<ETileType> tileType, 
 	tile->parentRoom = parentRoom;
 	tile->roomLocation = positionInRoom;
 	parentRoom->tiles.Add(tile);
+
+	// setting up the parentRoom's startTile
+	if (!parentRoom->startTile && tile->tileType == Floor)
+		parentRoom->startTile = tile;
 
 	return tile;
 }

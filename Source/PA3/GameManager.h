@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "GameManager.generated.h"
 
+class UTileBoardComponent;
+class UTileComponent;
+class APA3Character;
+
 UCLASS()
 class PA3_API AGameManager : public AActor
 {
@@ -14,6 +18,9 @@ class PA3_API AGameManager : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AGameManager();
+
+	/** To be called by TileBoardGenerater, after Generate() is complete*/
+	void PostTileBoardGeneration();
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,5 +38,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Generation")
 		bool bGenerationComplete;
+
+	UPROPERTY(VisibleAnywhere)
+		float WorldScaler = 200.f;
+
+	UPROPERTY(VisibleAnywhere)
+		UTileBoardComponent* tileBoard;
+
+	UPROPERTY(VisibleAnywhere)
+		APA3Character* playerCharecterRef;
 
 };
