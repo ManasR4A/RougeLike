@@ -59,6 +59,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
 		TMap<TEnumAsByte<ETileType>, TSubclassOf<AActor>> tileBPs;
 
+	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Material Refs")
+		UMaterialInterface* VictoryMat;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

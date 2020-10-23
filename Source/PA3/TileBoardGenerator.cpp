@@ -2,6 +2,7 @@
 #include "TileBoardGenerator.h"
 #include "RoomComponent.h"
 #include "DoorComponent.h"
+#include "VictoryComponent.h"
 #include "WallComponent.h"
 #include "GameManager.h"
 
@@ -234,6 +235,33 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 
 		}
 
+		// check for victoryRoom and attach VictoryTile
+		if (currentRoom->roomDeapth == victoryDeapth)
+		{
+			UDoorComponent* door = currentRoom->doors[0];
+			if (!door)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Didn't find door in victory room."));
+			}
+
+			// getting the tile ref for the victory tile
+			UTileComponent* victoryTile;
+			for (auto tile : door->parentTile->adjecentTiles)
+			{
+				if (tile->tileType != Door)
+				{
+					int32 randTileIndex = UKismetMathLibrary::RandomIntegerInRange(1, tile->adjecentTiles.Num());
+					victoryTile = tile;// ->adjecentTiles[randTileIndex - 1];
+					victoryTile->MakeVictoryTile(VictoryMat);
+					UE_LOG(LogTemp, Warning, TEXT("VictoryTileCreated!"));
+					break;
+				}
+			}
+
+			
+
+		}
+
 		// to go to next room in the tile board
 		m_currentRoomIndex++;
 
@@ -286,31 +314,6 @@ void ATileBoardGenerator::Generate()
 		currentRoom = startRoom;
 	}
 	
-	// get doors from current room & iterate for each door
-	for (auto door : currentRoom->doors)
-	{
-		int connectedCount = 0;
-
-		// if selected door is already connected
-		if (door->connectedDoor) 
-		{
-			connectedCount++;
-			if (connectedCount >= currentRoom->doors.Num())
-			{
-				currentDepth = currentRoom->roomDeapth;
-				// UE_LOG(LogTemp, Warning, TEXT("All Door already connected."));
-				continue;
-			}
-				
-			// UE_LOG(LogTemp, Warning, TEXT("Door already connected."));
-			continue;
-		}
-			
-		// Generate Room
-		GenerateRoomAtDoor(door, VictoryRoom);
-	
-	}
-
 	// Check and generation for victory room
 	if (currentRoom->roomDeapth == victoryDeapth - 1)
 	{
@@ -327,25 +330,71 @@ void ATileBoardGenerator::Generate()
 				currentRoom = prevRoom;
 			}
 		}
+		return;
 	}
 
-	// Recursively Generate Room at the doors
+	// get doors from current room & Geberate Rooms there
+
+	//UDoorComponent* doorToAdvance;
+	//int32 doorTries = 0;
+	//while (!doorToAdvance && doorTries < maxTries)
+	//{
+	//	int32 randDoorINdex = UKismetMathLibrary::RandomIntegerInRange(0, currentRoom->doors.Num() - 1);
+	//	if (!currentRoom->doors[randDoorINdex]->connectedDoor)
+	//	{
+	//		doorToAdvance = currentRoom->doors[randDoorINdex];
+	//		GenerateRoomAtDoor(doorToAdvance, VictoryRoom);
+	//	}
+	//}
+
 	else if (currentRoom->roomDeapth < victoryDeapth - 1)
 	{
-		int count = 0;
-		auto prevRoom = currentRoom;
-		for (auto door : prevRoom->doors)
+		for (auto door : currentRoom->doors)
 		{
-			if (door->connectedDoor && currentRoom->roomDeapth == door->connectedDoor->parentTile->parentRoom->roomDeapth - 1)
+			int connectedCount = 0;
+
+			// if selected door is already connected
+			if (door->connectedDoor)
 			{
-				count++;
-				currentRoom = door->connectedDoor->parentTile->parentRoom;
-				Generate();
-				currentRoom = prevRoom;
+				connectedCount++;
+				if (connectedCount >= currentRoom->doors.Num())
+				{
+					currentDepth = currentRoom->roomDeapth;
+					// UE_LOG(LogTemp, Warning, TEXT("All Door already connected."));
+					continue;
+				}
+
+				// UE_LOG(LogTemp, Warning, TEXT("Door already connected."));
+				continue;
 			}
+
+			// Generate Room
+			GenerateRoomAtDoor(door, VictoryRoom);
+
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Count = %d"), count);
 	}
+
+
+	//int count = 0;
+	//auto prevRoom = currentRoom;
+
+	// Recursively Generate Room at the random door
+	int32 randDoorIndex = UKismetMathLibrary::RandomIntegerInRange(0, currentRoom->doors.Num() - 1);
+	currentRoom = currentRoom->doors[randDoorIndex]->connectedDoor->parentTile->parentRoom;
+	Generate();
+
+	//for (auto door : prevRoom->doors)
+	//{
+	//	if (door->connectedDoor && currentRoom->roomDeapth == door->connectedDoor->parentTile->parentRoom->roomDeapth - 1)
+	//	{
+	//		count++;
+	//		currentRoom = door->connectedDoor->parentTile->parentRoom;
+	//		
+	//		currentRoom = prevRoom;
+	//	}
+	//}
+	//UE_LOG(LogTemp, Warning, TEXT("Count = %d"), count);
+	
 
 }
 

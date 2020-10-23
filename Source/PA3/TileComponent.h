@@ -39,5 +39,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	FVector GetWorldLocation(float WorldScaler);
+
+	bool MakeVictoryTile(UMaterialInterface* i_victoryMaterial);
 		
 };
