@@ -20,7 +20,9 @@ AGameManager::AGameManager()
 
 void AGameManager::PostTileBoardGeneration()
 {
-	playerCharecterRef->currentTile = tileBoard->rooms[0]->startTile;
+	currentRoom = tileBoard->rooms[0];
+	playerCharecterRef->currentRoom = tileBoard->rooms[0];
+	playerCharecterRef->currentTile = currentRoom->startTile;
 	playerCharecterRef->SetActorLocation(playerCharecterRef->currentTile->GetWorldLocation(WorldScaler));
 }
 
@@ -36,5 +38,8 @@ void AGameManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+
+	// testing
+	currentRoom = playerCharecterRef->currentRoom;
 }
 

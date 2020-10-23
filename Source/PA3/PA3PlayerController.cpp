@@ -2,7 +2,7 @@
 
 #include "PA3PlayerController.h"
 #include "TileComponent.h"
-
+#include "DoorComponent.h"
 
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
@@ -66,8 +66,38 @@ void APA3PlayerController::MoveToMouseCursor()
 		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
 
 		UTileComponent* HitTile = Hit.Actor.Get()->FindComponentByClass<UTileComponent>();
+		UDoorComponent* HitDoor = Hit.Actor.Get()->FindComponentByClass<UDoorComponent>();
 
-		if (HitTile)
+		if (HitDoor)
+		{
+		auto playerChar = Cast<APA3Character>(GetCharacter());
+		UTileComponent* playerTile = playerChar->currentTile;
+
+		if (playerTile != HitDoor->parentTile)
+		{
+			if (playerTile->adjecentTiles.Contains(HitDoor->parentTile))
+			{
+				playerChar->SetActorLocation(HitDoor->GetOwner()->GetActorLocation());
+				playerChar->currentTile = HitDoor->parentTile;
+
+				// if door is connected to other door, update player ad move player
+				UDoorComponent* connectedDoor = HitDoor->connectedDoor;
+				if (connectedDoor)
+				{
+					playerChar->SetActorLocation(connectedDoor->GetOwner()->GetActorLocation());
+					playerChar->currentTile = connectedDoor->parentTile;
+					playerChar->currentRoom = connectedDoor->parentTile->parentRoom;
+				}
+			}
+			else
+				UE_LOG(LogTemp, Warning, TEXT("Door Not Adjesent."));
+		}
+		else
+			UE_LOG(LogTemp, Warning, TEXT("Same Door as Current Door"));
+
+		}
+
+		else if (HitTile)
 		{
 			auto playerChar = Cast<APA3Character>(GetCharacter());
 			if (!playerChar)
@@ -83,9 +113,6 @@ void APA3PlayerController::MoveToMouseCursor()
 				{
 					playerChar->SetActorLocation(HitTile->GetOwner()->GetActorLocation());
 					playerChar->currentTile = HitTile;
-					//UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, HitTile->GetOwner()->GetActorLocation());
-					//SetNewMoveDestination(HitTile->GetOwner()->GetActorLocation());
-					
 				}
 				else
 					UE_LOG(LogTemp, Warning, TEXT("Tile Not Adjesent."));
@@ -94,6 +121,7 @@ void APA3PlayerController::MoveToMouseCursor()
 			else
 				UE_LOG(LogTemp, Warning, TEXT("Same Tile as Current Tile"));
 		}
+
 		else
 			UE_LOG(LogTemp, Error, TEXT("Didn't hit a tile"));
 

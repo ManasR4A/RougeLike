@@ -8,6 +8,7 @@
 
 class UTileBoardComponent;
 class UTileComponent;
+class URoomComponent;
 class APA3Character;
 
 UCLASS()
@@ -39,13 +40,16 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Generation")
 		bool bGenerationComplete;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Generation")
 		float WorldScaler = 200.f;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Generation")
 		UTileBoardComponent* tileBoard;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Gameplay")
 		APA3Character* playerCharecterRef;
+
+	UPROPERTY(VisibleAnywhere, Category = "Gameplay")
+		URoomComponent* currentRoom;
 
 };

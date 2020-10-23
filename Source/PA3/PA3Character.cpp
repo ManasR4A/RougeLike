@@ -64,7 +64,6 @@ APA3Character::APA3Character()
 void APA3Character::BeginPlay()
 {
 
-
 }
 
 void APA3Character::Tick(float DeltaSeconds)

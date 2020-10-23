@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "PA3Character.generated.h"
 
+
 UCLASS(Blueprintable)
 class APA3Character : public ACharacter
 {
@@ -28,6 +29,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		class UTileComponent* currentTile;
+
+	UPROPERTY(EditAnywhere)
+		class URoomComponent* currentRoom;
 
 private:
 	/** Top down camera */
