@@ -125,11 +125,6 @@ void APA3PlayerController::MoveToMouseCursor()
 		else
 			UE_LOG(LogTemp, Error, TEXT("Didn't hit a tile"));
 
-		if (Hit.bBlockingHit)
-		{
-			// We hit something, move there
-			SetNewMoveDestination(Hit.ImpactPoint);
-		}
 	}
 }
 
