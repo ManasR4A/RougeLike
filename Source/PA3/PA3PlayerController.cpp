@@ -109,13 +109,16 @@ void APA3PlayerController::MoveToMouseCursor()
 
 			if (playerTile != HitTile)
 			{
-				if (playerTile->adjecentTiles.Contains(HitTile))
+				if (playerTile->adjecentTiles.Contains(HitTile) && !HitTile->Visitor)
 				{
 					playerChar->SetActorLocation(HitTile->GetOwner()->GetActorLocation());
+
+					playerChar->currentTile->Visitor = nullptr;
 					playerChar->currentTile = HitTile;
+					playerChar->currentTile->Visitor = playerChar;
 				}
 				else
-					UE_LOG(LogTemp, Warning, TEXT("Tile Not Adjesent."));
+					UE_LOG(LogTemp, Warning, TEXT("Cannot move to THAT tile."));
 
 			}
 			else

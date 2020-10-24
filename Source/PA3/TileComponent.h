@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere)
 		URoomComponent* parentRoom;
 
+	UPROPERTY(EditAnywhere)
+		AActor* Visitor;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

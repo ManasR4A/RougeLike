@@ -8,6 +8,8 @@
 #include "TileComponent.h"
 #include "RoomComponent.h"
 
+#include "Kismet/KismetSystemLibrary.h"
+
 // Sets default values
 AGameManager::AGameManager()
 {
@@ -23,6 +25,7 @@ void AGameManager::PostTileBoardGeneration()
 	currentRoom = tileBoard->rooms[0];
 	playerCharecterRef->currentRoom = tileBoard->rooms[0];
 	playerCharecterRef->currentTile = currentRoom->startTile;
+	playerCharecterRef->currentTile->Visitor = playerCharecterRef;
 	playerCharecterRef->SetActorLocation(playerCharecterRef->currentTile->GetWorldLocation(WorldScaler));
 }
 
@@ -38,6 +41,10 @@ void AGameManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	if (playerCharecterRef->currentTile->tileType == Victory)
+	{
+		UKismetSystemLibrary::QuitGame(GetWorld(), Cast<APlayerController>(playerCharecterRef->GetController()), EQuitPreference::Quit, true);
+	}
 
 	// testing
 	currentRoom = playerCharecterRef->currentRoom;

@@ -42,10 +42,11 @@ FVector UTileComponent::GetWorldLocation(float WorldScaler)
 
 bool UTileComponent::MakeVictoryTile(UMaterialInterface* i_victoryMaterial)
 {
-	UVictoryComponent* VictoryComponent = NewObject<UVictoryComponent>(GetOwner());
+	UVictoryComponent* VictoryComponent = NewObject<UVictoryComponent>(GetOwner(), UVictoryComponent::StaticClass(), TEXT("VictoryComponent"));
 	VictoryComponent->RegisterComponent();
 
 	VictoryComponent->parentTile = this;
+	this->tileType = Victory;
 	auto mesh = this->GetOwner()->FindComponentByClass<UStaticMeshComponent>();
 	if (mesh)
 	{

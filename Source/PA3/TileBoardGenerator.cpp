@@ -227,7 +227,7 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 
 			// if the current tile is a door that is connected to other room, update both door tiles' adjesent tiles
 			UDoorComponent* door = tile->GetOwner()->FindComponentByClass<UDoorComponent>();
-			if (door && door->connectedDoor)
+			if (door && door->connectedDoor && !tile->adjecentTiles.Contains(door->connectedDoor->parentTile))
 			{
 				tile->adjecentTiles.Add(door->connectedDoor->parentTile);
 				door->connectedDoor->parentTile->adjecentTiles.Add(tile);

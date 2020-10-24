@@ -31,25 +31,28 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, Category = "Generation")
+	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")
 		bool bTileBoardGenerated;
 
-	UPROPERTY(VisibleAnywhere, Category = "Generation")
+	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")
 		bool bTilesAddressed;
 
-	UPROPERTY(VisibleAnywhere, Category = "Generation")
+	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")
 		bool bGenerationComplete;
 
-	UPROPERTY(VisibleAnywhere, Category = "Generation")
+	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")
 		float WorldScaler = 200.f;
 
-	UPROPERTY(VisibleAnywhere, Category = "Generation")
+	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")
 		UTileBoardComponent* tileBoard;
 
-	UPROPERTY(VisibleAnywhere, Category = "Gameplay")
+	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Gameplay")
+		bool bPlayersTurn;
+
+	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Gameplay")
 		APA3Character* playerCharecterRef;
 
-	UPROPERTY(VisibleAnywhere, Category = "Gameplay")
+	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Gameplay")
 		URoomComponent* currentRoom;
 
 };
