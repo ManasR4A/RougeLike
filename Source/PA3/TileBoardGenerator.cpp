@@ -375,13 +375,27 @@ void ATileBoardGenerator::Generate()
 	}
 
 
-	//int count = 0;
-	//auto prevRoom = currentRoom;
 
-	// Recursively Generate Room at the random door
-	int32 randDoorIndex = UKismetMathLibrary::RandomIntegerInRange(0, currentRoom->doors.Num() - 1);
-	currentRoom = currentRoom->doors[randDoorIndex]->connectedDoor->parentTile->parentRoom;
-	Generate();
+	UDoorComponent* connectedDoor;
+	int32 randDoorIndex;
+	int32 doorSelectionTries = 0;
+
+	// loop to get door until proper door is found in current room
+	while (true && doorSelectionTries < maxTries)
+	{
+		doorSelectionTries++;
+		randDoorIndex = UKismetMathLibrary::RandomIntegerInRange(0, currentRoom->doors.Num() - 1);
+		connectedDoor = currentRoom->doors[randDoorIndex]->connectedDoor;
+
+		// condition to check if the selected door is connected to a room forward in the room deapth 
+		// and not the one before the current room/
+		if (connectedDoor && connectedDoor->parentTile->parentRoom->roomDeapth > currentRoom->roomDeapth)
+		{
+			currentRoom = connectedDoor->parentTile->parentRoom;
+			Generate();
+			break;
+		}
+	}
 
 	//for (auto door : prevRoom->doors)
 	//{

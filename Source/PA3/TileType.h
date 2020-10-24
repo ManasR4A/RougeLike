@@ -15,6 +15,8 @@ enum ETileType
 	Floor, 
 	Wall,
 	Door,
+	Victory,
+	Lava, 
 	Empty
 };
 
