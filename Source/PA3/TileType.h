@@ -28,3 +28,10 @@ enum EDoorOrientation
 	West,
 	South
 };
+
+UENUM()
+enum EWeapon
+{
+	Spear,
+	None
+};

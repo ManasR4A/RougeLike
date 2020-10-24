@@ -39,6 +39,9 @@ protected:
 	/** Input handlers for SetDestination action. */
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
+
+	/**Helper function to manage movement of player and respective tile data handling.*/
+	void MovePlayerToTile(class UTileComponent* i_TargetTile);
 };
 
 

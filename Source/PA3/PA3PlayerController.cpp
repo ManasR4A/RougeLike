@@ -77,15 +77,13 @@ void APA3PlayerController::MoveToMouseCursor()
 		{
 			if (playerTile->adjecentTiles.Contains(HitDoor->parentTile))
 			{
-				playerChar->SetActorLocation(HitDoor->GetOwner()->GetActorLocation());
-				playerChar->currentTile = HitDoor->parentTile;
+				MovePlayerToTile(HitDoor->parentTile);
 
-				// if door is connected to other door, update player ad move player
+				// if door is connected to other door, update player and move player
 				UDoorComponent* connectedDoor = HitDoor->connectedDoor;
 				if (connectedDoor)
 				{
-					playerChar->SetActorLocation(connectedDoor->GetOwner()->GetActorLocation());
-					playerChar->currentTile = connectedDoor->parentTile;
+					MovePlayerToTile(connectedDoor->parentTile);
 					playerChar->currentRoom = connectedDoor->parentTile->parentRoom;
 				}
 			}
@@ -100,22 +98,14 @@ void APA3PlayerController::MoveToMouseCursor()
 		else if (HitTile)
 		{
 			auto playerChar = Cast<APA3Character>(GetCharacter());
-			if (!playerChar)
-			{
-				UE_LOG(LogTemp, Error, TEXT("Cast to player char failed."));
-				return;
-			}
+
 			UTileComponent* playerTile = playerChar->currentTile;
 
 			if (playerTile != HitTile)
 			{
 				if (playerTile->adjecentTiles.Contains(HitTile) && !HitTile->Visitor)
 				{
-					playerChar->SetActorLocation(HitTile->GetOwner()->GetActorLocation());
-
-					playerChar->currentTile->Visitor = nullptr;
-					playerChar->currentTile = HitTile;
-					playerChar->currentTile->Visitor = playerChar;
+					MovePlayerToTile(HitTile);
 				}
 				else
 					UE_LOG(LogTemp, Warning, TEXT("Cannot move to THAT tile."));
@@ -171,4 +161,14 @@ void APA3PlayerController::OnSetDestinationReleased()
 {
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
+}
+
+void APA3PlayerController::MovePlayerToTile(UTileComponent* i_TargetTile)
+{
+	APA3Character* playerChar = Cast<APA3Character>(GetCharacter());
+
+	playerChar->currentTile->Visitor = nullptr;
+	playerChar->SetActorLocation(i_TargetTile->GetOwner()->GetActorLocation());
+	playerChar->currentTile = i_TargetTile;
+	i_TargetTile->Visitor = playerChar;
 }

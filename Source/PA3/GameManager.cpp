@@ -41,6 +41,7 @@ void AGameManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	// Quit if player enters victory tile
 	if (playerCharecterRef->currentTile->tileType == Victory)
 	{
 		UKismetSystemLibrary::QuitGame(GetWorld(), Cast<APlayerController>(playerCharecterRef->GetController()), EQuitPreference::Quit, true);

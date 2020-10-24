@@ -4,6 +4,7 @@
 
 #include "TileComponent.h"
 #include "TileBoardComponent.h"
+#include "TileType.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
@@ -59,11 +60,18 @@ APA3Character::APA3Character()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	// Create players default stats.
+	Health = 3;
+	Mana = 5;
+	JumpRadius = 2;
+	ThrowRaius = 2;
+	EquipedWeapon = None;
 }
 
 void APA3Character::BeginPlay()
 {
-
+	Super::BeginPlay();
 }
 
 void APA3Character::Tick(float DeltaSeconds)

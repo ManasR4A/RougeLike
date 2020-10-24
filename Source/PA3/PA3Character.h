@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "TileType.h"
+
 #include "GameFramework/Character.h"
 #include "PA3Character.generated.h"
 
@@ -27,11 +30,27 @@ public:
 	/** Returns CursorToWorld subobject **/
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Player|Position Data")
 		class UTileComponent* currentTile;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Player|Position Data")
 		class URoomComponent* currentRoom;
+
+	UPROPERTY(EditAnywhere, Category = "Player")
+		int32 Health;
+
+	UPROPERTY(EditAnywhere, Category = "Player")
+		int32 Mana;
+
+	UPROPERTY(EditAnywhere, Category = "Player")
+		int32 JumpRadius;
+
+	UPROPERTY(EditAnywhere, Category = "Player")
+		int32 ThrowRaius;
+
+	UPROPERTY(EditAnywhere, Category = "Player")
+		TEnumAsByte<EWeapon> EquipedWeapon;
+
 
 private:
 	/** Top down camera */
