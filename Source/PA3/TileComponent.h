@@ -44,5 +44,6 @@ public:
 	FVector GetWorldLocation(float WorldScaler);
 
 	bool MakeVictoryTile(UMaterialInterface* i_victoryMaterial);
+	bool MakeLavaTile(UMaterialInterface* i_LavaMat);
 		
 };

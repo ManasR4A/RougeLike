@@ -32,6 +32,19 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Generation")
 		int32 maxTries;
 
+	/**A Matrix for the Markov chain used to generate the Lava tiles.
+	* @key		TileType Lava or Floor
+	* @Value	FVector2D for the probabilities
+	*	FVector2D.x = Lava probability
+	*	FVector2D.y = Floor probability
+	*/
+	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Generation|Lava Generation")
+		TMap<TEnumAsByte<ETileType>, FVector2D> LavaGenMarkovMatrix;
+
+	/**float value to define how much percent of floow tiles can have lava. (Value between 0.0f & 0.5f) */
+	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Generation|Lava Generation")
+		float LavaTilePercent;
+
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Tile Board Data")
 		float worldScaler;
 
@@ -62,6 +75,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Material Refs")
 		UMaterialInterface* VictoryMat;
 
+	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Material Refs")
+		UMaterialInterface* LavaMat;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -81,12 +97,15 @@ protected:
 #pragma endregion
 
 
+	// Helper functions for generating specific tiles
+	int32 GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom);
 
+	// Helper functions for door generation
 	TEnumAsByte<EDoorOrientation> GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir);
 	int32 hasOppositeDoorDIr(FString i_roomData, TEnumAsByte<EDoorOrientation> i_doorDir);
-
 	UDoorComponent* GetFacingDoor(URoomComponent* i_roomToLookIn, TEnumAsByte<EDoorOrientation> i_dirToLooksFor);
 
+	// Helper functions for initial room generation
 	void GenerateRoomAtDoor(UDoorComponent* i_DoorComponent, bool genVictoryRoom);
 	bool CheckForRoomCollision(URoomComponent* i_tempRoom);
 	void allignRoomsViaDoors(URoomComponent* i_StaticRoom, UDoorComponent* i_StaticDoor, URoomComponent* i_RoomToMove, UDoorComponent* i_DoorToAllign);

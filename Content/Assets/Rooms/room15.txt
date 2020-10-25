@@ -1,6 +1,6 @@
-       --N--
-       |   |
-       |   |
+xxxxxxx--N--
+xxxxxxx|   |
+xxxxxxx|   |
 -------|   |
 |          |
 W          |

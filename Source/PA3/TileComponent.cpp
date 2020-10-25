@@ -56,3 +56,16 @@ bool UTileComponent::MakeVictoryTile(UMaterialInterface* i_victoryMaterial)
 	return true;
 }
 
+bool UTileComponent::MakeLavaTile(UMaterialInterface* i_LavaMat)
+{
+
+	this->tileType = Lava;
+	auto mesh = this->GetOwner()->FindComponentByClass<UStaticMeshComponent>();
+	if (mesh)
+	{
+		mesh->SetMaterial(0, i_LavaMat);
+	}
+
+	return true;
+}
+

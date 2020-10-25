@@ -3,6 +3,6 @@
 W          E
 |          |
 --------   |
-       |   |
-       |   |
-       --S--
+xxxxxxx|   |
+xxxxxxx|   |
+xxxxxxx--S--

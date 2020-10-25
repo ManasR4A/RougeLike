@@ -15,6 +15,9 @@ ATileBoardGenerator::ATileBoardGenerator()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	LavaGenMarkovMatrix.Add(Lava, FVector2D::ZeroVector);
+	LavaGenMarkovMatrix.Add(Floor, FVector2D::ZeroVector);
 	
 }
 
@@ -36,6 +39,80 @@ void ATileBoardGenerator::BeginPlay()
 	gameManagerRef->bTileBoardGenerated = true;
 	gameManagerRef->tileBoard = tileBoard;
 	gameManagerRef->PostTileBoardGeneration();
+}
+
+int32 ATileBoardGenerator::GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom)
+{
+	int32 lavaTileCount = 0;
+	int32 spawnTries = 0;
+
+	// Getting Lava Gen Start Tile
+	UTileComponent* selectedTile = nullptr;
+
+	for (auto tile : i_TargetRoom->tiles)
+	{
+		if (tile->tileType == Floor && !tile->Visitor)
+		{
+			for (auto adjTile : tile->adjecentTiles)
+			{
+				if (adjTile->tileType != Door && !adjTile->Visitor)
+				{
+					selectedTile = tile;
+					break;
+				}
+			}
+			if (selectedTile)
+				break;
+		}
+	}
+
+	if (!selectedTile)
+		return 0;
+
+	int32 tilesVisited = 0;
+	int32 totalTilesToVisit = UKismetMathLibrary::FFloor(i_TargetRoom->tiles.Num() * LavaTilePercent);
+	
+	UTileComponent* nextTile;
+
+	// small number of iterations to limit total iterations
+	while (tilesVisited < totalTilesToVisit)
+	{
+		int32 randAdjesentTileINdex = UKismetMathLibrary::RandomIntegerInRange(0, selectedTile->adjecentTiles.Num() - 1);
+		nextTile = selectedTile->adjecentTiles[randAdjesentTileINdex];
+		bool nexTileNextToDoor = false;
+
+		// check if the nextTile is next to a door or not.
+		for (auto adjTile : nextTile->adjecentTiles)
+		{
+			if (adjTile->tileType == Door)
+			{
+				nexTileNextToDoor = true;
+				break;
+			}
+		}
+
+		// check if the nextTile is LavaPossible
+		if (nextTile->tileType != Door && !nextTile->Visitor && !nexTileNextToDoor)
+		{
+			tilesVisited++;
+
+			// get the probabilities
+			auto lookupKey = selectedTile->tileType;
+			FVector2D probabilities = *(LavaGenMarkovMatrix.Find(lookupKey));
+
+			// roll dice and check
+			float spawnChance = UKismetMathLibrary::RandomFloatInRange(0.0f, 1.0f);
+			if (spawnChance <= probabilities.X)
+			{
+				nextTile->MakeLavaTile(LavaMat);
+				selectedTile = nextTile;
+				lavaTileCount++;
+			}
+		}
+	}
+	
+
+	return lavaTileCount;
 }
 
 TEnumAsByte<EDoorOrientation> ATileBoardGenerator::GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir)
@@ -257,9 +334,12 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 					break;
 				}
 			}
+		}
 
-			
-
+		else if(currentRoom->roomDeapth < victoryDeapth)
+		{
+			int32 LavaTileCount = GenerateLavaTilesInRoom(currentRoom);
+			UE_LOG(LogTemp, Warning, TEXT("LavaTiles = %d"), LavaTileCount);
 		}
 
 		// to go to next room in the tile board
@@ -523,6 +603,11 @@ URoomComponent* ATileBoardGenerator::CreateRoomComponentFromString(FString roomN
 		{
 			tileType = ETileType::Floor;
 			tileRotation = FRotator::ZeroRotator;
+		}
+		else if (tileChar == "x")
+		{
+			x++;
+			continue;
 		}
 		else if (tileChar == "\r")
 		{

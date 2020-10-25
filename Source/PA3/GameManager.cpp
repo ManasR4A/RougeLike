@@ -23,6 +23,8 @@ AGameManager::AGameManager()
 void AGameManager::PostTileBoardGeneration()
 {
 	currentRoom = tileBoard->rooms[0];
+
+	playerCharecterRef->gameManagerRef = this;
 	playerCharecterRef->currentRoom = tileBoard->rooms[0];
 	playerCharecterRef->currentTile = currentRoom->startTile;
 	playerCharecterRef->currentTile->Visitor = playerCharecterRef;

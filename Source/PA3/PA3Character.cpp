@@ -2,6 +2,7 @@
 
 #include "PA3Character.h"
 
+#include "PA3PlayerController.h"
 #include "TileComponent.h"
 #include "TileBoardComponent.h"
 #include "TileType.h"

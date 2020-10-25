@@ -30,6 +30,9 @@ public:
 	/** Returns CursorToWorld subobject **/
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 
+	UPROPERTY(EditAnywhere, Category = "Player|References")
+		class AGameManager* gameManagerRef;
+
 	UPROPERTY(EditAnywhere, Category = "Player|Position Data")
 		class UTileComponent* currentTile;
 
