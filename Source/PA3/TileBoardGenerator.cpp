@@ -5,6 +5,7 @@
 #include "VictoryComponent.h"
 #include "WallComponent.h"
 #include "GameManager.h"
+#include "PA3Character.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "GenericPlatform/GenericPlatformMath.h"
@@ -38,6 +39,7 @@ void ATileBoardGenerator::BeginPlay()
 	m_totalGeneratedRooms = tileBoard->rooms.Num();
 	gameManagerRef->bTileBoardGenerated = true;
 	gameManagerRef->tileBoard = tileBoard;
+	gameManagerRef->playerCharecterRef = Cast<APA3Character>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	gameManagerRef->PostTileBoardGeneration();
 }
 
@@ -55,7 +57,7 @@ int32 ATileBoardGenerator::GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom)
 		{
 			for (auto adjTile : tile->adjecentTiles)
 			{
-				if (adjTile->tileType != Door && !adjTile->Visitor)
+				if (adjTile.Value->tileType != Door && !adjTile.Value->Visitor)
 				{
 					selectedTile = tile;
 					break;
@@ -77,14 +79,17 @@ int32 ATileBoardGenerator::GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom)
 	// small number of iterations to limit total iterations
 	while (tilesVisited < totalTilesToVisit)
 	{
-		int32 randAdjesentTileINdex = UKismetMathLibrary::RandomIntegerInRange(0, selectedTile->adjecentTiles.Num() - 1);
-		nextTile = selectedTile->adjecentTiles[randAdjesentTileINdex];
+		TArray<TEnumAsByte<EDoorOrientation>> keys;
+		selectedTile->adjecentTiles.GetKeys(keys);
+		int32 randAdjesentTileINdex = UKismetMathLibrary::RandomIntegerInRange(0, keys.Num() - 1);
+
+		nextTile = selectedTile->adjecentTiles[keys[randAdjesentTileINdex]];
 		bool nexTileNextToDoor = false;
 
 		// check if the nextTile is next to a door or not.
 		for (auto adjTile : nextTile->adjecentTiles)
 		{
-			if (adjTile->tileType == Door)
+			if (adjTile.Value->tileType == Door)
 			{
 				nexTileNextToDoor = true;
 				break;
@@ -304,10 +309,12 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 
 			// if the current tile is a door that is connected to other room, update both door tiles' adjesent tiles
 			UDoorComponent* door = tile->GetOwner()->FindComponentByClass<UDoorComponent>();
-			if (door && door->connectedDoor && !tile->adjecentTiles.Contains(door->connectedDoor->parentTile))
+			if (door && door->connectedDoor && !tile->adjecentTiles.FindKey(door->connectedDoor->parentTile))
 			{
-				tile->adjecentTiles.Add(door->connectedDoor->parentTile);
-				door->connectedDoor->parentTile->adjecentTiles.Add(tile);
+				auto doorDir = door->doorDirection;
+				auto connectedDoorDir = GetOppositeSide(doorDir);
+				tile->adjecentTiles.Add(doorDir, door->connectedDoor->parentTile);
+				door->connectedDoor->parentTile->adjecentTiles.Add(connectedDoorDir, tile);
 			}
 
 		}
@@ -325,10 +332,10 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 			UTileComponent* victoryTile;
 			for (auto tile : door->parentTile->adjecentTiles)
 			{
-				if (tile->tileType != Door)
+				if (tile.Value->tileType != Door)
 				{
-					int32 randTileIndex = UKismetMathLibrary::RandomIntegerInRange(1, tile->adjecentTiles.Num());
-					victoryTile = tile;// ->adjecentTiles[randTileIndex - 1];
+					int32 randTileIndex = UKismetMathLibrary::RandomIntegerInRange(1, tile.Value->adjecentTiles.Num());
+					victoryTile = tile.Value;// ->adjecentTiles[randTileIndex - 1];
 					victoryTile->MakeVictoryTile(VictoryMat);
 					UE_LOG(LogTemp, Warning, TEXT("VictoryTileCreated!"));
 					break;
@@ -637,8 +644,8 @@ int32 ATileBoardGenerator::GetAdjesentTiles(UTileComponent* i_Tile)
 
 	// get all 4 direction coords
 	FVector up, down, left, right;
-	up = tileCoords + FVector(0.f, worldScaler, 0.f);
-	down = tileCoords + FVector(0.f, -worldScaler, 0.f);
+	up = tileCoords + FVector(0.f, -worldScaler, 0.f);
+	down = tileCoords + FVector(0.f, worldScaler, 0.f);
 	left = tileCoords + FVector(-worldScaler, 0.f, 0.f);
 	right = tileCoords + FVector(worldScaler, 0.f, 0.f);
 
@@ -659,9 +666,21 @@ int32 ATileBoardGenerator::GetAdjesentTiles(UTileComponent* i_Tile)
 		// check if tile loc is any one of 4 coords
 		FVector tileLoc = tile->GetOwner()->GetActorLocation();
 		tileLoc.Z = 0.f;
-		if (tileLoc == up || tileLoc == down || tileLoc == right || tileLoc == left)
+		if (tileLoc == up)
 		{
-			i_Tile->adjecentTiles.Add(tile);
+			i_Tile->adjecentTiles.Add(North, tile);
+		}
+		else if (tileLoc == down)
+		{
+			i_Tile->adjecentTiles.Add(South, tile);
+		}
+		else if (tileLoc == right)
+		{
+			i_Tile->adjecentTiles.Add(East, tile);
+		}
+		else if (tileLoc == left)
+		{
+			i_Tile->adjecentTiles.Add(West, tile);
 		}
 			
 	}

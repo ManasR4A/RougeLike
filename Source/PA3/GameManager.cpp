@@ -35,7 +35,6 @@ void AGameManager::PostTileBoardGeneration()
 void AGameManager::BeginPlay()
 {
 	Super::BeginPlay();
-	playerCharecterRef = Cast<APA3Character>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 }
 
 // Called every frame

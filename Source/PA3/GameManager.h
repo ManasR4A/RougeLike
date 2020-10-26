@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "TileType.h"
+
 #include "GameFramework/Actor.h"
 #include "GameManager.generated.h"
 
@@ -45,6 +48,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")
 		UTileBoardComponent* tileBoard;
+
+	UPROPERTY(EditAnywhere, Category = "Game Manager|Gameplay")
+		TMap<TEnumAsByte<EAction>, int32> ManaCosts;
 
 	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Gameplay")
 		bool bPlayersTurn;

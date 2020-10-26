@@ -35,3 +35,12 @@ enum EWeapon
 	Spear,
 	None
 };
+
+UENUM()
+enum EAction
+{
+	Jump,
+	Attack,
+	Push,
+	Throw
+};

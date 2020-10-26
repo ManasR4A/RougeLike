@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "TileType.h"
+
 #include "GameFramework/PlayerController.h"
 #include "PA3PlayerController.generated.h"
 
@@ -18,6 +21,9 @@ public:
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
+
+	/** True if the charecter is jumping. */
+	uint32 bJumping : 1;
 
 	// Begin PlayerController interface
 	virtual void PlayerTick(float DeltaTime) override;
@@ -40,8 +46,21 @@ protected:
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
 
-	/**Helper function to manage movement of player and respective tile data handling.*/
+	/** Input handlers for Jump action. */
+	void OnJumpPressed();
+	void OnJumpReleased();
+
+	/** Helper function to manage movement of player and respective tile data handling.*/
 	void MovePlayerToTile(class UTileComponent* i_TargetTile);
+	
+	/** Helper function to rotate the player ro face the target tile. */
+	void FacePlayerToTile(class UTileComponent* i_TargetTile);
+
+	/** Helper function to Get players facing direction in EDoorOrientation format. */
+	TEnumAsByte<EDoorOrientation> GetPlayerRotationCardinal();
+
+	bool CheckNextTileInDir(UTileComponent* i_currentTile, TEnumAsByte<EDoorOrientation> i_Dir);
+
 };
 
 

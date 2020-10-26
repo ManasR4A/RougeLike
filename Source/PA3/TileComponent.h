@@ -22,7 +22,7 @@ public:
 		TEnumAsByte<ETileType> tileType;
 
 	UPROPERTY(EditAnywhere)
-		TArray<UTileComponent*> adjecentTiles;
+		TMap<TEnumAsByte<EDoorOrientation>, UTileComponent*> adjecentTiles;
 
 	UPROPERTY(EditAnywhere)
 		FVector2D roomLocation;
