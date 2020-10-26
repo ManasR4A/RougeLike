@@ -120,6 +120,29 @@ int32 ATileBoardGenerator::GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom)
 	return lavaTileCount;
 }
 
+bool ATileBoardGenerator::GenerateUpgradeTileInRoom(URoomComponent* i_TargetRoom)
+{
+	int32 Upgradetries = 0;
+	while (!i_TargetRoom->bHasUpgradeTile && Upgradetries < maxTries)
+	{
+		Upgradetries++;
+		int32 randTileIndex = UKismetMathLibrary::RandomIntegerInRange(0, i_TargetRoom->tiles.Num() - 1);
+		UTileComponent* selectedTile = i_TargetRoom->tiles[randTileIndex];
+		if (selectedTile->tileType == Floor && !selectedTile->Visitor)
+		{
+			selectedTile->MakeUpgradeTile(UpgradeMat);
+			i_TargetRoom->bHasUpgradeTile = true;
+			return true;
+		}
+	}
+	return false;
+}
+
+int32 ATileBoardGenerator::GenerateEnemiesInRoom(URoomComponent* i_TargetRoom)
+{
+	return int32();
+}
+
 TEnumAsByte<EDoorOrientation> ATileBoardGenerator::GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir)
 {
 	switch (i_doorDir)
@@ -316,7 +339,6 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 				tile->adjecentTiles.Add(doorDir, door->connectedDoor->parentTile);
 				door->connectedDoor->parentTile->adjecentTiles.Add(connectedDoorDir, tile);
 			}
-
 		}
 
 		// check for victoryRoom and attach VictoryTile
@@ -346,7 +368,13 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 		else if(currentRoom->roomDeapth < victoryDeapth)
 		{
 			int32 LavaTileCount = GenerateLavaTilesInRoom(currentRoom);
+			bool UpgradeTileSpawned = GenerateUpgradeTileInRoom(currentRoom);
+			//int32 EnemyCount = GenerateEnemiesInRoom(currentRoom);
+
 			UE_LOG(LogTemp, Warning, TEXT("LavaTiles = %d"), LavaTileCount);
+			if(UpgradeTileSpawned)
+				UE_LOG(LogTemp, Warning, TEXT("UpgradeTile Spawned"));
+			//UE_LOG(LogTemp, Warning, TEXT("Enemy Count = %d"), EnemyCount);
 		}
 
 		// to go to next room in the tile board

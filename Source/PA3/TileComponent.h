@@ -8,6 +8,7 @@
 #include "TileComponent.generated.h"
 
 class URoomComponent;
+class UMaterialInterface;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PA3_API UTileComponent : public UActorComponent
@@ -33,6 +34,8 @@ public:
 	UPROPERTY(EditAnywhere)
 		AActor* Visitor;
 
+	UMaterialInterface* FloorMat;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -45,5 +48,6 @@ public:
 
 	bool MakeVictoryTile(UMaterialInterface* i_victoryMaterial);
 	bool MakeLavaTile(UMaterialInterface* i_LavaMat);
+	bool MakeUpgradeTile(UMaterialInterface* i_UpgradeMat);
 		
 };

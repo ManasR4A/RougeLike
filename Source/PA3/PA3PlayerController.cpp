@@ -81,6 +81,7 @@ void APA3PlayerController::MoveToMouseCursor()
 		{
 			if (playerTile->adjecentTiles.FindKey(HitDoor->parentTile))
 			{
+				playerChar->gameManagerRef->bPlayersTurn = false;
 				MovePlayerToTile(HitDoor->parentTile);
 
 				// if door is connected to other door, update player and move player
@@ -107,9 +108,10 @@ void APA3PlayerController::MoveToMouseCursor()
 
 			if (playerTile != HitTile)
 			{
-				if (playerTile->adjecentTiles.FindKey(HitTile) && !HitTile->Visitor && HitTile->tileType != Lava)
+				if (playerTile->adjecentTiles.FindKey(HitTile) && !HitTile->Visitor && (HitTile->tileType != Lava || playerChar->FireProtection))
 				{
 					MovePlayerToTile(HitTile);
+					playerChar->gameManagerRef->bPlayersTurn = false;
 				}
 				else
 				{
@@ -162,7 +164,11 @@ void APA3PlayerController::OnSetDestinationPressed()
 {
 	// set flag to keep updating destination until released
 	bMoveToMouseCursor = true;
-	MoveToMouseCursor();
+	auto playerChar = Cast<APA3Character>(GetCharacter());
+	if (true)//playerChar->gameManagerRef->bPlayersTurn)
+	{
+		MoveToMouseCursor();
+	}
 }
 
 void APA3PlayerController::OnSetDestinationReleased()

@@ -16,7 +16,8 @@ enum ETileType
 	Wall,
 	Door,
 	Victory,
-	Lava, 
+	Lava,
+	Upgrade,
 	Empty
 };
 
@@ -43,4 +44,17 @@ enum EAction
 	Attack,
 	Push,
 	Throw
+};
+
+UENUM()
+enum EUpgrades
+{
+	HealthRefill,
+	ManaRefill,
+	MaxHealthIncrease,
+	MaxManaIncrease,
+	MeleaDamageIncrease,
+	ThrowRadiusIncrease,
+	JumpRadiusIncrease,
+	FireProtection
 };

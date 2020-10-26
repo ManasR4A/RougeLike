@@ -68,6 +68,8 @@ APA3Character::APA3Character()
 	JumpRadius = 2;
 	ThrowRaius = 2;
 	EquipedWeapon = None;
+	FireProtection = false;
+	MeleaDamage = 1;
 }
 
 void APA3Character::BeginPlay()

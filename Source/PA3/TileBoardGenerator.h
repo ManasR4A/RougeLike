@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "TileType.h"
+
 #include "TileBoardGenerator.generated.h"
 
 class UTileBoardComponent;
@@ -13,6 +14,7 @@ class URoomComponent;
 class UTileComponent;
 class UWallComponent;
 class AGameManager;
+class UMaterialInterface;
 
 UCLASS()
 class PA3_API ATileBoardGenerator : public AActor
@@ -78,6 +80,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Material Refs")
 		UMaterialInterface* LavaMat;
 
+	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Material Refs")
+		UMaterialInterface* UpgradeMat;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -99,6 +104,8 @@ protected:
 
 	// Helper functions for generating specific tiles
 	int32 GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom);
+	bool GenerateUpgradeTileInRoom(URoomComponent* i_TargetRoom);
+	int32 GenerateEnemiesInRoom(URoomComponent* i_TargetRoom);
 
 	// Helper functions for door generation
 	TEnumAsByte<EDoorOrientation> GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir);

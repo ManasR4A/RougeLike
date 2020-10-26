@@ -46,11 +46,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
 		int32 Mana;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
+		int32 MeleaDamage;
+
 	UPROPERTY(EditAnywhere, Category = "Player")
 		int32 JumpRadius;
 
 	UPROPERTY(EditAnywhere, Category = "Player")
 		int32 ThrowRaius;
+
+	UPROPERTY(EditAnywhere, Category = "Player")
+		bool FireProtection;
 
 	UPROPERTY(EditAnywhere, Category = "Player")
 		TEnumAsByte<EWeapon> EquipedWeapon;

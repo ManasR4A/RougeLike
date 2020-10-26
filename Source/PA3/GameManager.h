@@ -29,6 +29,15 @@ public:
 	/** A helper function to run tasks when player moves to a new room. */
 	void PlayerInNewRoom(URoomComponent* i_OldRoom, URoomComponent* i_NewRoom);
 
+	/** Helper function to geta random upgrade. To be called by WBP_Upgrade */
+	UFUNCTION(BlueprintCallable)
+		TArray<TEnumAsByte<EUpgrades>> GetRandomUpgrade();
+
+	/** Helper function to execute the selected upgrade. */
+	UFUNCTION(BlueprintCallable)
+		bool ExecuteSelectedUpgrade(TEnumAsByte<EUpgrades> SelectedUpgrade);
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -55,6 +64,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Game Manager|Gameplay")
 		TMap<TEnumAsByte<EAction>, int32> ManaCosts;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager|Gameplay")
+		TMap<TEnumAsByte<EUpgrades>, float> UpgradeProbability;
+
 	UPROPERTY(EditAnywhere, Category = "Game Manager|Gameplay")
 		int32 MaxMana;
 	
@@ -78,6 +90,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager|Gameplay")
 		bool bFailure;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager|Gameplay")
+		bool bUpgrade;
 
 	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Gameplay")
 		APA3Character* playerCharecterRef;

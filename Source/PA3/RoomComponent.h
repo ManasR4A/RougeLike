@@ -49,6 +49,9 @@ public:
 		FString roomName;
 
 	UPROPERTY(EditAnywhere)
+		bool bHasUpgradeTile;
+
+	UPROPERTY(EditAnywhere)
 		TArray<UTileBoardComponent*> boards;
 		
 };

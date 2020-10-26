@@ -69,3 +69,16 @@ bool UTileComponent::MakeLavaTile(UMaterialInterface* i_LavaMat)
 	return true;
 }
 
+bool UTileComponent::MakeUpgradeTile(UMaterialInterface* i_UpgradeMat)
+{
+	this->tileType = Upgrade;
+	auto mesh = this->GetOwner()->FindComponentByClass<UStaticMeshComponent>();
+	if (mesh)
+	{
+		FloorMat = mesh->GetMaterial(0);
+		mesh->SetMaterial(0, i_UpgradeMat);
+	}
+
+	return true;
+}
+
