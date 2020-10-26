@@ -88,7 +88,7 @@ void APA3PlayerController::MoveToMouseCursor()
 				if (connectedDoor)
 				{
 					MovePlayerToTile(connectedDoor->parentTile);
-					playerChar->currentRoom = connectedDoor->parentTile->parentRoom;
+					playerChar->gameManagerRef->PlayerInNewRoom(playerChar->currentRoom, connectedDoor->parentTile->parentRoom);
 				}
 			}
 			else

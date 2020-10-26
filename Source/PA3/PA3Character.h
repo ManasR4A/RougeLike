@@ -9,6 +9,7 @@
 #include "GameFramework/Character.h"
 #include "PA3Character.generated.h"
 
+class AGameManager;
 
 UCLASS(Blueprintable)
 class APA3Character : public ACharacter
@@ -30,8 +31,8 @@ public:
 	/** Returns CursorToWorld subobject **/
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 
-	UPROPERTY(EditAnywhere, Category = "Player|References")
-		class AGameManager* gameManagerRef;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|References")
+		AGameManager* gameManagerRef;
 
 	UPROPERTY(EditAnywhere, Category = "Player|Position Data")
 		class UTileComponent* currentTile;
@@ -39,10 +40,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Player|Position Data")
 		class URoomComponent* currentRoom;
 
-	UPROPERTY(EditAnywhere, Category = "Player")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
 		int32 Health;
 
-	UPROPERTY(EditAnywhere, Category = "Player")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
 		int32 Mana;
 
 	UPROPERTY(EditAnywhere, Category = "Player")
