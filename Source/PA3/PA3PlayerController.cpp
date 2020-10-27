@@ -108,7 +108,7 @@ void APA3PlayerController::MoveToMouseCursor()
 
 			if (playerTile != HitTile)
 			{
-				if (playerTile->adjecentTiles.FindKey(HitTile) && !HitTile->Visitor && (HitTile->tileType != Lava || playerChar->FireProtection))
+				if (playerTile->adjecentTiles.FindKey(HitTile) && !HitTile->Visitor && HitTile->tileType != Wall && (HitTile->tileType != Lava || playerChar->FireProtection))
 				{
 					MovePlayerToTile(HitTile);
 					playerChar->gameManagerRef->bPlayersTurn = false;
@@ -197,6 +197,7 @@ void APA3PlayerController::OnJumpPressed()
 			}
 			else
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Cannot Cross Gap."))
 				currTile = nullptr;
 				break;
 			}

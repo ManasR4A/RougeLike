@@ -12,6 +12,7 @@
 
 
 class UDoorComponent;
+class ABaseEnemy;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PA3_API URoomComponent : public UActorComponent
@@ -44,6 +45,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		TArray<UDoorComponent*> doors;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<TSubclassOf<ABaseEnemy>> EnemiesInRoom;
 
 	UPROPERTY(EditAnywhere)
 		FString roomName;

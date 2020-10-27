@@ -49,12 +49,19 @@ enum EAction
 UENUM()
 enum EUpgrades
 {
-	HealthRefill,
-	ManaRefill,
-	MaxHealthIncrease,
-	MaxManaIncrease,
-	MeleaDamageIncrease,
+	FireProtection,
 	ThrowRadiusIncrease,
 	JumpRadiusIncrease,
-	FireProtection
+	MeleaDamageIncrease,
+	MaxHealthIncrease,
+	MaxManaIncrease,
+	HealthRefill,
+	ManaRefill
+};
+
+UENUM()
+enum EEnemyType
+{
+	Warrior,
+	Archer
 };

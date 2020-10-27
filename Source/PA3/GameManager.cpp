@@ -26,14 +26,14 @@ AGameManager::AGameManager()
 	MinThrowRadius = 2;
 	MaxThrowRadius = 5;
 
-	UpgradeProbability.Add(HealthRefill, 0.0f);
-	UpgradeProbability.Add(ManaRefill, 0.0f);
-	UpgradeProbability.Add(MaxHealthIncrease, 0.0f);
-	UpgradeProbability.Add(MaxManaIncrease, 0.0f);
-	UpgradeProbability.Add(MeleaDamageIncrease, 0.0f);
+	UpgradeProbability.Add(FireProtection, 0.0f);
 	UpgradeProbability.Add(ThrowRadiusIncrease, 0.0f);
 	UpgradeProbability.Add(JumpRadiusIncrease, 0.0f);
-	UpgradeProbability.Add(FireProtection, 0.0f);
+	UpgradeProbability.Add(MeleaDamageIncrease, 0.0f);
+	UpgradeProbability.Add(MaxHealthIncrease, 0.0f);
+	UpgradeProbability.Add(MaxManaIncrease, 0.0f);
+	UpgradeProbability.Add(HealthRefill, 0.0f);
+	UpgradeProbability.Add(ManaRefill, 0.0f);
 
 }
 
@@ -69,11 +69,15 @@ TArray<TEnumAsByte<EUpgrades>> AGameManager::GetRandomUpgrade()
 	{
 		bool Added = false;
 		float roll = UKismetMathLibrary::RandomFloatInRange(0.f, 1.f);
+		int32 rollint =  UKismetMathLibrary::FFloor(roll * 1000);
+		UE_LOG(LogTemp, Warning, TEXT("upgrade roll = %d"), rollint);
 		TArray<TEnumAsByte<EUpgrades>> keys;
 		UpgradeProbability.GetKeys(keys);
-		for (auto key : keys)
+		
+		for (auto keyindex = keys.Num() - 1; keyindex >= 0 ; keyindex--)
 		{
-			if (UpgradeProbability[key] < roll && !ret.Contains(key))
+			auto key = keys[keyindex];
+			if (UpgradeProbability[key] > roll && !ret.Contains(key))
 			{
 				ret.AddUnique(key);
 				Added = true;
@@ -131,6 +135,7 @@ bool AGameManager::ExecuteSelectedUpgrade(TEnumAsByte<EUpgrades> SelectedUpgrade
 		break;
 
 	case JumpRadiusIncrease:
+		MaxJumpRadius++;
 		if (playerCharecterRef->JumpRadius < MaxJumpRadius)
 		{
 			playerCharecterRef->JumpRadius++;

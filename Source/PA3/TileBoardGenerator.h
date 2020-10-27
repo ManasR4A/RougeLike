@@ -15,6 +15,7 @@ class UTileComponent;
 class UWallComponent;
 class AGameManager;
 class UMaterialInterface;
+class ABaseEnemy;
 
 UCLASS()
 class PA3_API ATileBoardGenerator : public AActor
@@ -73,6 +74,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
 		TMap<TEnumAsByte<ETileType>, TSubclassOf<AActor>> tileBPs;
+
+	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
+		TMap<TEnumAsByte<EEnemyType>, TSubclassOf<ABaseEnemy>> enemyBPS;
 
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Material Refs")
 		UMaterialInterface* VictoryMat;

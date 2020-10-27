@@ -97,7 +97,7 @@ int32 ATileBoardGenerator::GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom)
 		}
 
 		// check if the nextTile is LavaPossible
-		if (nextTile->tileType != Door && !nextTile->Visitor && !nexTileNextToDoor)
+		if (nextTile->tileType != Door && nextTile->tileType != Wall && !nextTile->Visitor && !nexTileNextToDoor)
 		{
 			tilesVisited++;
 
@@ -686,10 +686,10 @@ int32 ATileBoardGenerator::GetAdjesentTiles(UTileComponent* i_Tile)
 		}
 
 		// check if the tile is not wall
-		if (tile->GetOwner()->FindComponentByClass<UWallComponent>())
-		{
-			continue;
-		}
+		//if (tile->GetOwner()->FindComponentByClass<UWallComponent>())
+		//{
+		//	continue;
+		//}
 			
 		// check if tile loc is any one of 4 coords
 		FVector tileLoc = tile->GetOwner()->GetActorLocation();
