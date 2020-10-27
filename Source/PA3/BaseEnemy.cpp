@@ -3,6 +3,8 @@
 
 #include "BaseEnemy.h"
 #include "TileComponent.h"
+#include "RoomComponent.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
@@ -17,6 +19,12 @@ void ABaseEnemy::DamageEnemy(int32 i_DamageAmount)
 	this->Health -= i_DamageAmount;
 	if (this->Health <= 0)
 	{
+		// remove this enemy from the room's Enemies list
+		if (this->currentTile->parentRoom->EnemiesInRoom.Contains(this))
+		{
+			this->currentTile->parentRoom->EnemiesInRoom.Remove(this);
+		}
+
 		this->currentTile->Visitor = nullptr;
 		Destroy();
 	}
@@ -38,7 +46,7 @@ void ABaseEnemy::Push(TEnumAsByte<EDoorOrientation> i_PushedInDir)
 		// kill if in Lava
 		else if (nextTileInDir->tileType == Lava)
 		{
-			MoveToTile(nextTileInDir);
+			MoveToTile(nextTileInDir, true);
 			DamageEnemy(this->Health);
 			return;
 		}
@@ -53,35 +61,55 @@ void ABaseEnemy::Push(TEnumAsByte<EDoorOrientation> i_PushedInDir)
 			}
 		}
 
-		MoveToTile(nextTileInDir);
+		MoveToTile(nextTileInDir, true);
 
 	}
 }
 
-void ABaseEnemy::MoveToTile(UTileComponent* i_TargetTile)
+void ABaseEnemy::MoveToTile(UTileComponent* i_TargetTile, bool i_bTeleport)
 {
 	this->currentTile->Visitor = nullptr;
 	
 	// for location
 	FVector oldLoc = this->GetActorLocation();
 	FVector newLoc = i_TargetTile->GetOwner()->GetActorLocation();
-	this->SetActorLocation(newLoc, true);
 
-	// for rotation
-	oldLoc.Z = 0.f;
-	newLoc.Z = 0.f;
-	FRotator oldRot = this->GetActorRotation();
-	FVector DifVector = newLoc - oldLoc;
-	FRotator newRot = DifVector.Rotation();
-	newRot.Roll = oldRot.Roll;
-	newRot.Pitch = oldRot.Pitch;
-	this->SetActorRotation(newRot);
+	if (true)
+	{
+		this->SetActorLocation(newLoc);
 
+		// for rotation
+		oldLoc.Z = 0.f;
+		newLoc.Z = 0.f;
+		FRotator oldRot = this->GetActorRotation();
+		FVector DifVector = newLoc - oldLoc;
+		FRotator newRot = DifVector.Rotation();
+		newRot.Roll = oldRot.Roll;
+		newRot.Pitch = oldRot.Pitch;
+		this->SetActorRotation(newRot);
+	}
+	else
+	{
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this->GetController(), newLoc);
+	}
+
+	i_TargetTile->Visitor = this;
 	this->currentTile = i_TargetTile;
 }
 
-void ABaseEnemy::MoveToPlayer()
+bool ABaseEnemy::MoveToPlayer(APA3Character* i_playerChar)
 {
+	return false;
+}
+
+bool ABaseEnemy::TakeTurn(APA3Character* i_playerChar)
+{
+	return false;
+}
+
+bool ABaseEnemy::CanAttackPlayer(APA3Character* i_playerChar)
+{
+	return false;
 }
 
 // Called when the game starts or when spawned

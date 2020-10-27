@@ -31,10 +31,13 @@ public:
 	/** Returns CursorToWorld subobject **/
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 
+	UFUNCTION(BlueprintCallable, Category = "Player")
+		void DamagePlayer();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|References")
 		AGameManager* gameManagerRef;
 
-	UPROPERTY(EditAnywhere, Category = "Player|Position Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Position Data")
 		class UTileComponent* currentTile;
 
 	UPROPERTY(EditAnywhere, Category = "Player|Position Data")

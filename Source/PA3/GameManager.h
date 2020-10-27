@@ -52,7 +52,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")
 		bool bTilesAddressed;
 
-	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Game Manager|Generation")
 		bool bGenerationComplete;
 
 	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")

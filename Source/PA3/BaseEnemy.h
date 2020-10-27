@@ -10,6 +10,8 @@
 #include "BaseEnemy.generated.h"
 
 class UTileComponent;
+class APA3Character;
+class AGameManager;
 
 UCLASS()
 class PA3_API ABaseEnemy : public ACharacter
@@ -27,10 +29,16 @@ public:
 	virtual void Push(TEnumAsByte<EDoorOrientation> i_PushedInDir);
 
 	UFUNCTION(BlueprintCallable, Category = "EnemyBase")
-	virtual void MoveToTile(UTileComponent* i_TargetTile);
+	virtual void MoveToTile(UTileComponent* i_TargetTile, bool i_bTeleport);
 
 	UFUNCTION(BlueprintCallable, Category = "EnemyBase")
-	virtual void MoveToPlayer();
+	virtual bool MoveToPlayer(APA3Character* i_playerChar);
+
+	UFUNCTION(BlueprintCallable, Category = "EnemyBase")
+	virtual bool TakeTurn(APA3Character* i_playerChar);
+
+	UFUNCTION(BlueprintCallable, Category = "EnemyBase")
+	virtual	bool CanAttackPlayer(APA3Character* i_playerChar);
 
 protected:
 	// Called when the game starts or when spawned
@@ -51,5 +59,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyBase")
 		TEnumAsByte<EEnemyType> EnemyType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyBase")
+		AGameManager* gameManagerRef;
 
 };

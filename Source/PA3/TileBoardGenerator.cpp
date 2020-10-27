@@ -7,6 +7,10 @@
 #include "GameManager.h"
 #include "PA3Character.h"
 
+#include "BaseEnemy.h"
+#include "WarriorEnemy.h"
+#include "ArcherEnemy.h"
+
 #include "Kismet/KismetMathLibrary.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
@@ -41,6 +45,95 @@ void ATileBoardGenerator::BeginPlay()
 	gameManagerRef->tileBoard = tileBoard;
 	gameManagerRef->playerCharecterRef = Cast<APA3Character>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	gameManagerRef->PostTileBoardGeneration();
+}
+
+int32 ATileBoardGenerator::SpawnEnemies(URoomComponent* i_TargetRoom)
+{
+	int32 targetEnemyCount = i_TargetRoom->roomDeapth + 1;
+	int32 EnemiesSpawned = 0;
+
+	for (EnemiesSpawned = 0; EnemiesSpawned < targetEnemyCount; EnemiesSpawned++)
+	{
+		UTileComponent* spawnTile = GetSpawnTile(i_TargetRoom);
+		if (spawnTile)
+		{
+			if (!SpawnEnemy(spawnTile, Warrior))
+			{
+				EnemiesSpawned--;
+			}
+		}
+		else
+			EnemiesSpawned--;
+	}
+	return EnemiesSpawned;
+}
+
+UTileComponent* ATileBoardGenerator::GetSpawnTile(URoomComponent* i_TargetRoom)
+{
+	int32 enemySpawnTileTries= 0;
+	while (enemySpawnTileTries < maxTries)
+	{
+		enemySpawnTileTries++;
+		int32 randTileIndex = UKismetMathLibrary::RandomIntegerInRange(0, i_TargetRoom->tiles.Num() - 1);
+		UTileComponent* tile = i_TargetRoom->tiles[randTileIndex];
+		if (tile->tileType == Floor && !tile->Visitor)
+		{
+			return tile;
+		}
+	}
+	return nullptr;
+}
+
+bool ATileBoardGenerator::SpawnEnemy(UTileComponent* i_TargetTile, TEnumAsByte<EEnemyType> i_EnemyType)
+{
+
+	AActor* spawnedEnemyActor;
+	AWarriorEnemy* spawnedWarrior;
+	AArcherEnemy* spawnedArcher;
+	FVector spawnLoc = i_TargetTile->GetOwner()->GetActorLocation();
+	FRotator spawnRot = FRotator::ZeroRotator;
+
+
+	switch (i_EnemyType)
+	{
+	case Warrior:
+		spawnedEnemyActor = GetWorld()->SpawnActor(warriorBP.Get(), &spawnLoc, &spawnRot);
+		spawnedWarrior = Cast<AWarriorEnemy>(spawnedEnemyActor);
+		if (!spawnedWarrior)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to cast spawned enemy to warrior."));
+			return false;
+		}
+		else
+		{
+			spawnedWarrior->currentTile = i_TargetTile;
+			i_TargetTile->Visitor = spawnedWarrior;
+			i_TargetTile->parentRoom->EnemiesInRoom.Add(spawnedWarrior);
+			return true;
+		}
+		break;
+
+	case Archer:
+		spawnedEnemyActor = GetWorld()->SpawnActor(archerBP.Get(), &spawnLoc, &spawnRot);
+		spawnedArcher = Cast<AArcherEnemy>(spawnedEnemyActor);
+		if (!spawnedArcher)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to cast spawned enemy to warrior."));
+			return false;
+		}
+		else
+		{
+			spawnedArcher->currentTile = i_TargetTile;
+			i_TargetTile->Visitor = spawnedArcher;
+			i_TargetTile->parentRoom->EnemiesInRoom.Add(spawnedArcher);
+			return true;
+		}
+		break;
+
+	default:
+		return false;
+
+	}
 }
 
 int32 ATileBoardGenerator::GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom)
@@ -140,7 +233,7 @@ bool ATileBoardGenerator::GenerateUpgradeTileInRoom(URoomComponent* i_TargetRoom
 
 int32 ATileBoardGenerator::GenerateEnemiesInRoom(URoomComponent* i_TargetRoom)
 {
-	return int32();
+	return SpawnEnemies(i_TargetRoom);
 }
 
 TEnumAsByte<EDoorOrientation> ATileBoardGenerator::GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir)
@@ -369,12 +462,12 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 		{
 			int32 LavaTileCount = GenerateLavaTilesInRoom(currentRoom);
 			bool UpgradeTileSpawned = GenerateUpgradeTileInRoom(currentRoom);
-			//int32 EnemyCount = GenerateEnemiesInRoom(currentRoom);
+			int32 EnemyCount = GenerateEnemiesInRoom(currentRoom);
 
 			UE_LOG(LogTemp, Warning, TEXT("LavaTiles = %d"), LavaTileCount);
 			if(UpgradeTileSpawned)
 				UE_LOG(LogTemp, Warning, TEXT("UpgradeTile Spawned"));
-			//UE_LOG(LogTemp, Warning, TEXT("Enemy Count = %d"), EnemyCount);
+			UE_LOG(LogTemp, Warning, TEXT("Enemy Count = %d"), EnemyCount);
 		}
 
 		// to go to next room in the tile board

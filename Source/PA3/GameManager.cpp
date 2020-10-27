@@ -7,6 +7,9 @@
 #include "TileBoardComponent.h"
 #include "TileComponent.h"
 #include "RoomComponent.h"
+#include "BaseEnemy.h"
+#include "WarriorEnemy.h"
+#include "ArcherEnemy.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -58,7 +61,6 @@ void AGameManager::PlayerInNewRoom(URoomComponent* i_OldRoom, URoomComponent* i_
 {
 	playerCharecterRef->currentRoom = i_NewRoom;
 	playerCharecterRef->Mana = MaxMana;
-
 }
 
 TArray<TEnumAsByte<EUpgrades>> AGameManager::GetRandomUpgrade()
@@ -74,9 +76,10 @@ TArray<TEnumAsByte<EUpgrades>> AGameManager::GetRandomUpgrade()
 		TArray<TEnumAsByte<EUpgrades>> keys;
 		UpgradeProbability.GetKeys(keys);
 		
-		for (auto keyindex = keys.Num() - 1; keyindex >= 0 ; keyindex--)
+		for (auto key : keys)
+		//for (auto keyindex = keys.Num() - 1; keyindex >= 0 ; keyindex--)
 		{
-			auto key = keys[keyindex];
+			//auto key = keys[keyindex];
 			if (UpgradeProbability[key] > roll && !ret.Contains(key))
 			{
 				ret.AddUnique(key);
@@ -180,6 +183,8 @@ void AGameManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	currentRoom = playerCharecterRef->currentRoom;
+
 	switch (playerCharecterRef->currentTile->tileType)
 	{
 	case Victory:
@@ -198,8 +203,26 @@ void AGameManager::Tick(float DeltaTime)
 		bFailure = true;
 	}
 
-	// testing
-	currentRoom = playerCharecterRef->currentRoom;
-	currentDeapth = currentRoom->roomDeapth;
+	// if the player's turn is over, all the enemies in the room should take turn.
+	if (!bPlayersTurn)
+	{
+		// look in currentRoom for the enemies and iterate over them.
+		for (ABaseEnemy* Enemy : currentRoom->EnemiesInRoom)
+		{
+			AWarriorEnemy* warrior = Cast<AWarriorEnemy>(Enemy);
+			if (warrior)
+			{
+				warrior->TakeTurn(playerCharecterRef);
+			}
+				
+
+			AArcherEnemy* archer = Cast<AArcherEnemy>(Enemy);
+			if (archer)
+				archer->TakeTurn(playerCharecterRef);
+			
+		}
+
+		bPlayersTurn = true;
+	}
 }
 

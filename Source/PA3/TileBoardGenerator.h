@@ -16,6 +16,8 @@ class UWallComponent;
 class AGameManager;
 class UMaterialInterface;
 class ABaseEnemy;
+class AWarriorEnemy;
+class AArcherEnemy;
 
 UCLASS()
 class PA3_API ATileBoardGenerator : public AActor
@@ -76,7 +78,10 @@ public:
 		TMap<TEnumAsByte<ETileType>, TSubclassOf<AActor>> tileBPs;
 
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
-		TMap<TEnumAsByte<EEnemyType>, TSubclassOf<ABaseEnemy>> enemyBPS;
+		TSubclassOf<AWarriorEnemy> warriorBP;
+
+	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
+		TSubclassOf<AArcherEnemy> archerBP;
 
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Material Refs")
 		UMaterialInterface* VictoryMat;
@@ -105,6 +110,10 @@ protected:
 
 #pragma endregion
 
+	// Helper functions for Enemy spawning
+	int32 SpawnEnemies(URoomComponent* i_TargetRoom);
+	UTileComponent* GetSpawnTile(URoomComponent* i_TargetRoom);
+	bool SpawnEnemy(UTileComponent* i_TargetTile, TEnumAsByte<EEnemyType> i_EnemyType);
 
 	// Helper functions for generating specific tiles
 	int32 GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom);

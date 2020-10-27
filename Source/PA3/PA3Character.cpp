@@ -6,6 +6,7 @@
 #include "TileComponent.h"
 #include "TileBoardComponent.h"
 #include "TileType.h"
+#include "GameManager.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
@@ -106,5 +107,14 @@ void APA3Character::Tick(float DeltaSeconds)
 			CursorToWorld->SetWorldLocation(TraceHitResult.Location);
 			CursorToWorld->SetWorldRotation(CursorR);
 		}
+	}
+}
+
+void APA3Character::DamagePlayer()
+{
+	this->Health--;
+	if (this->Health <= 0)
+	{
+		gameManagerRef->bFailure = true;
 	}
 }

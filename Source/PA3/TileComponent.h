@@ -22,7 +22,7 @@ public:
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<ETileType> tileType;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TMap<TEnumAsByte<EDoorOrientation>, UTileComponent*> adjecentTiles;
 
 	UPROPERTY(EditAnywhere)

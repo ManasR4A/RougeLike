@@ -47,7 +47,7 @@ public:
 		TArray<UDoorComponent*> doors;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<TSubclassOf<ABaseEnemy>> EnemiesInRoom;
+		TArray<ABaseEnemy*> EnemiesInRoom;
 
 	UPROPERTY(EditAnywhere)
 		FString roomName;

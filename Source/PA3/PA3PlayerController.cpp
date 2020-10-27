@@ -81,7 +81,7 @@ void APA3PlayerController::MoveToMouseCursor()
 		{
 			if (playerTile->adjecentTiles.FindKey(HitDoor->parentTile))
 			{
-				playerChar->gameManagerRef->bPlayersTurn = false;
+				playerChar->gameManagerRef->bPlayersTurn = true;
 				MovePlayerToTile(HitDoor->parentTile);
 
 				// if door is connected to other door, update player and move player
@@ -165,7 +165,7 @@ void APA3PlayerController::OnSetDestinationPressed()
 	// set flag to keep updating destination until released
 	bMoveToMouseCursor = true;
 	auto playerChar = Cast<APA3Character>(GetCharacter());
-	if (true)//playerChar->gameManagerRef->bPlayersTurn)
+	if (playerChar->gameManagerRef->bPlayersTurn)
 	{
 		MoveToMouseCursor();
 	}
@@ -235,7 +235,7 @@ void APA3PlayerController::MovePlayerToTile(UTileComponent* i_TargetTile)
 	playerChar->currentTile->Visitor = nullptr;
 
 	// Updating Location and Rotation
-	playerChar->SetActorLocation(i_TargetTile->GetOwner()->GetActorLocation(), true);
+	UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, i_TargetTile->GetOwner()->GetActorLocation());
 	playerChar->SetActorRotation(newRotation);
 
 	playerChar->currentTile = i_TargetTile;
