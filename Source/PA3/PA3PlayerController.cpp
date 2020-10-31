@@ -5,6 +5,7 @@
 #include "DoorComponent.h"
 #include "GameManager.h"
 #include "BaseEnemy.h"
+#include "BasePickup.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
@@ -112,6 +113,11 @@ void APA3PlayerController::MoveToMouseCursor()
 				if (playerTile->adjecentTiles.FindKey(HitTile) && !HitTile->Visitor && HitTile->tileType != Wall && (HitTile->tileType != Lava || playerChar->FireProtection))
 				{
 					MovePlayerToTile(HitTile);
+					if (HitTile->Pickup)
+					{
+						ABasePickup* pickup = Cast<ABasePickup>(HitTile->Pickup);
+						pickup->CollectPickup();
+					}
 					playerChar->gameManagerRef->bPlayersTurn = false;
 				}
 				else
@@ -223,6 +229,7 @@ void APA3PlayerController::OnThrowPressed()
 	APA3Character* playerChar = Cast<APA3Character>(GetCharacter());
 	auto FacingDir = GetPlayerRotationCardinal();
 
+	UE_LOG(LogTemp, Warning, TEXT("Throw input recieved."));
 	if (playerChar->EquipedWeapon == Spear)
 	{
 
@@ -236,9 +243,11 @@ void APA3PlayerController::OnThrowPressed()
 			}
 			else
 			{
+				UE_LOG(LogTemp, Error, TEXT("Cannot throw on that tile."));
 				break;
 			}
 		}
+		UE_LOG(LogTemp, Error, TEXT("Throw Distance = %d"), visitingTileCount);
 
 		// only throw if visitingTileCount is bigger than min throw radius
 		if (visitingTileCount >= playerChar->gameManagerRef->MinThrowRadius)
@@ -250,11 +259,18 @@ void APA3PlayerController::OnThrowPressed()
 				{
 					enemy->DamageEnemy(enemy->Health);
 				}
-				else
-				{
-					// TODO: implement spear drop
-				}
 			}
+
+			playerChar->EquipedWeapon = None;
+			UE_LOG(LogTemp, Warning, TEXT("Thrown"));
+
+			// drop a spear as a pickup
+			FVector spawnLoc = visitingTile->GetOwner()->GetActorLocation();
+			FRotator spawnRot = FRotator::ZeroRotator;
+			AActor* newSpearPickup = GetWorld()->SpawnActor(playerChar->gameManagerRef->pickupRef.Get(), &spawnLoc, &spawnRot);
+			visitingTile->Pickup = newSpearPickup;
+			ABasePickup* newSpear = Cast<ABasePickup>(newSpearPickup);
+			newSpear->parentTile = visitingTile;
 
 			// player has taken turn, thus update that.
 			playerChar->gameManagerRef->bPlayersTurn = false;

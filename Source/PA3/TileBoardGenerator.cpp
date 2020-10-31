@@ -45,6 +45,7 @@ void ATileBoardGenerator::BeginPlay()
 	gameManagerRef->bTileBoardGenerated = true;
 	gameManagerRef->tileBoard = tileBoard;
 	gameManagerRef->playerCharecterRef = Cast<APA3Character>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	gameManagerRef->pickupRef = pickupBP;
 	gameManagerRef->PostTileBoardGeneration();
 }
 
@@ -885,7 +886,12 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 			int32 LavaTileCount = GenerateLavaTilesInRoom(currentRoom);
 			bool UpgradeTileSpawned = GenerateUpgradeTileInRoom(currentRoom);
 			int32 EnemyCount = GenerateEnemiesInRoom(currentRoom);
-			GeneratePickupInRoom(currentRoom);
+			
+			// generate spear only in first room
+			if (currentRoom == tileBoard->rooms[0])
+			{
+				GeneratePickupInRoom(currentRoom);
+			}
 
 			UE_LOG(LogTemp, Warning, TEXT("LavaTiles = %d"), LavaTileCount);
 			if(UpgradeTileSpawned)

@@ -183,6 +183,10 @@ void AGameManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bGenerationComplete)
+	{
+		playerCharecterRef->canTick = true;
+	}
 	currentRoom = playerCharecterRef->currentRoom;
 
 	switch (playerCharecterRef->currentTile->tileType)

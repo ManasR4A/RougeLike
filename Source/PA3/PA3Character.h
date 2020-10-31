@@ -66,6 +66,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
 		TEnumAsByte<EWeapon> EquipedWeapon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
+		bool canTick = false;
 
 private:
 	/** Top down camera */

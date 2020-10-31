@@ -46,6 +46,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	TSubclassOf<AActor> pickupRef;
+
 	UPROPERTY(VisibleAnywhere, Category = "Game Manager|Generation")
 		bool bTileBoardGenerated;
 
