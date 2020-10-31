@@ -217,6 +217,24 @@ void APA3PlayerController::OnJumpReleased()
 	bJumping = false;
 }
 
+void APA3PlayerController::OnThrowPressed()
+{
+	APA3Character* playerChar = Cast<APA3Character>(GetCharacter());
+	auto playerFacing = GetPlayerRotationCardinal();
+}
+
+void APA3PlayerController::OnPushPressed()
+{
+	APA3Character* playerChar = Cast<APA3Character>(GetCharacter());
+	auto playerFacing = GetPlayerRotationCardinal();
+}
+
+void APA3PlayerController::OnAttackPressed()
+{
+	APA3Character* playerChar = Cast<APA3Character>(GetCharacter());
+	auto playerFacing = GetPlayerRotationCardinal();
+}
+
 void APA3PlayerController::MovePlayerToTile(UTileComponent* i_TargetTile)
 {
 	APA3Character* playerChar = Cast<APA3Character>(GetCharacter());

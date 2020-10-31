@@ -474,9 +474,11 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 		m_currentRoomIndex++;
 
 		// if all rooms were visited to address the tiles, update bTilesAddressed
-		if (m_currentRoomIndex > m_totalGeneratedRooms)
+		if (m_currentRoomIndex >= m_totalGeneratedRooms)
 		{
 			gameManagerRef->bTilesAddressed = true;
+			gameManagerRef->bGenerationComplete = true;
+			UE_LOG(LogTemp, Warning, TEXT("GENERATION COMPLETE!!!"));
 		}
 	}
 }

@@ -47,8 +47,21 @@ protected:
 	void OnSetDestinationReleased();
 
 	/** Input handlers for Jump action. */
+	UFUNCTION(BlueprintCallable, Category = "PA3Controller|InputHandlers")
 	void OnJumpPressed();
 	void OnJumpReleased();
+
+	/** Input Handlers for Throw action. */
+	UFUNCTION(BlueprintCallable, Category = "PA3Controller|InputHandlers")
+	void OnThrowPressed();
+
+	/** Input Handlers for Push action. */
+	UFUNCTION(BlueprintCallable, Category = "PA3Controller|InputHandlers")
+	void OnPushPressed();
+
+	/** Input Handlers for Attack action. */
+	UFUNCTION(BlueprintCallable, Category = "PA3Controller|InputHandlers")
+	void OnAttackPressed();
 
 	/** Helper function to manage movement of player and respective tile data handling.*/
 	void MovePlayerToTile(class UTileComponent* i_TargetTile);

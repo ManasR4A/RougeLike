@@ -61,7 +61,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Player")
 		bool FireProtection;
 
-	UPROPERTY(EditAnywhere, Category = "Player")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
 		TEnumAsByte<EWeapon> EquipedWeapon;
 
 

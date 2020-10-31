@@ -14,36 +14,6 @@ AWarriorEnemy::AWarriorEnemy()
 	this->Health = 1;
 }
 
-//void AWarriorEnemy::MoveToTile(UTileComponent* i_TargetTile, bool bTeleport)
-//{
-//	this->currentTile->Visitor = nullptr;
-//
-//	// for location
-//	FVector oldLoc = this->GetActorLocation();
-//	FVector newLoc = i_TargetTile->GetOwner()->GetActorLocation();
-//
-//	if (true)
-//	{
-//		this->SetActorLocation(newLoc);
-//		// for rotation
-//		oldLoc.Z = 0.f;
-//		newLoc.Z = 0.f;
-//		FRotator oldRot = this->GetActorRotation();
-//		FVector DifVector = newLoc - oldLoc;
-//		FRotator newRot = DifVector.Rotation();
-//		newRot.Roll = oldRot.Roll;
-//		newRot.Pitch = oldRot.Pitch;
-//		this->SetActorRotation(newRot);
-//	}
-//	else
-//	{
-//		UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), newLoc);
-//	}
-//
-//	i_TargetTile->Visitor = this;
-//	this->currentTile = i_TargetTile;
-//}
-
 bool AWarriorEnemy::MoveToPlayer(APA3Character* i_playerChar)
 {
 	// Get the tile currentTile locations
@@ -56,14 +26,14 @@ bool AWarriorEnemy::MoveToPlayer(APA3Character* i_playerChar)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Enemy, player in same X axis"));
 		// check north and south and move appropriately
-		if (TryMoveInDir(North))
+		if (currentTileLoc.Y > playerTileLoc.Y)
 		{
-			return true;
+			return (TryMoveInDir(North) ? true : false);
 		}
 
-		if (TryMoveInDir(South))
+		if (currentTileLoc.Y < playerTileLoc.Y)
 		{
-			return true;
+			return (TryMoveInDir(South) ? true : false);
 		}
 	}
 
@@ -71,42 +41,48 @@ bool AWarriorEnemy::MoveToPlayer(APA3Character* i_playerChar)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Enemy, player in same Y axis"));
 		// check east and west and move appropriately
-		if (TryMoveInDir(East))
+		if (currentTileLoc.X < playerTileLoc.X)
 		{
-			return true;
+			return (TryMoveInDir(East) ? true : false);
 		}
 
-		if (TryMoveInDir(West))
+		if (currentTileLoc.X > playerTileLoc.X)
 		{
-			return true;
+			return (TryMoveInDir(West) ? true : false);
 		}
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Enemy, player in differenct axes"));
 
 	// if both axis different, move in suitable axis first
-	if (TryMoveInDir(North))
+	bool bMovedInX = false, bMovedInY = false;
+	if (currentTileLoc.Y > playerTileLoc.Y)
 	{
-		return true;
+		bMovedInY = TryMoveInDir(North) ? true : false;
 	}
 
-	if (TryMoveInDir(East))
+	else if (currentTileLoc.Y < playerTileLoc.Y)
 	{
-		return true;
+		bMovedInY = TryMoveInDir(South) ? true : false;
 	}
 
-	if (TryMoveInDir(South))
+	if (bMovedInY)
 	{
-		return true;
+		return bMovedInY;
+	}
+		
+
+	if (currentTileLoc.X < playerTileLoc.X)
+	{
+		bMovedInX = TryMoveInDir(East) ? true : false;
 	}
 
-	if (TryMoveInDir(West))
+	else if (currentTileLoc.X > playerTileLoc.X)
 	{
-		return true;
+		bMovedInX = TryMoveInDir(West) ? true : false;
 	}
 
-	UE_LOG(LogTemp, Error, TEXT("warrior Not Moved."));
-	return false;
+	return (bMovedInX);
 
 }
 
