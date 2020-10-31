@@ -65,3 +65,10 @@ enum EEnemyType
 	Warrior,
 	Archer
 };
+
+//UENUM()
+//enum EPickupType
+//{
+//	Spear,
+//	None
+//};

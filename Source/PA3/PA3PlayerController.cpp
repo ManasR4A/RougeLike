@@ -4,6 +4,7 @@
 #include "TileComponent.h"
 #include "DoorComponent.h"
 #include "GameManager.h"
+#include "BaseEnemy.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
@@ -185,7 +186,7 @@ void APA3PlayerController::OnJumpPressed()
 	auto playerFacing = GetPlayerRotationCardinal();
 
 	// only execute if the player has enough Mana
-	if (playerChar->Mana > playerChar->gameManagerRef->ManaCosts[Jump])
+	if (playerChar->Mana >= playerChar->gameManagerRef->ManaCosts[Jump])
 	{
 		UTileComponent* currTile = playerChar->currentTile;
 		// check the adjesent tile if exists and in the direction.
@@ -220,19 +221,82 @@ void APA3PlayerController::OnJumpReleased()
 void APA3PlayerController::OnThrowPressed()
 {
 	APA3Character* playerChar = Cast<APA3Character>(GetCharacter());
-	auto playerFacing = GetPlayerRotationCardinal();
+	auto FacingDir = GetPlayerRotationCardinal();
+
+	if (playerChar->EquipedWeapon == Spear)
+	{
+
+		UTileComponent* visitingTile = playerChar->currentTile;
+		int32 visitingTileCount = 1;
+		for (visitingTileCount = 1 ; visitingTileCount <= playerChar->ThrowRaius; visitingTileCount++)
+		{
+			if (CheckNextTileInDir(visitingTile, FacingDir))
+			{
+				visitingTile = visitingTile->adjecentTiles[FacingDir];
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		// only throw if visitingTileCount is bigger than min throw radius
+		if (visitingTileCount >= playerChar->gameManagerRef->MinThrowRadius)
+		{
+			if (visitingTile->Visitor)
+			{
+				ABaseEnemy* enemy = Cast<ABaseEnemy>(visitingTile->Visitor);
+				if (enemy)
+				{
+					enemy->DamageEnemy(enemy->Health);
+				}
+				else
+				{
+					// TODO: implement spear drop
+				}
+			}
+
+			// player has taken turn, thus update that.
+			playerChar->gameManagerRef->bPlayersTurn = false;
+		}
+	}
 }
 
 void APA3PlayerController::OnPushPressed()
 {
 	APA3Character* playerChar = Cast<APA3Character>(GetCharacter());
-	auto playerFacing = GetPlayerRotationCardinal();
+	auto FacingDir = GetPlayerRotationCardinal();
+	UE_LOG(LogTemp, Warning, TEXT("Push button pressed."));
+
+	UTileComponent* currentTile = playerChar->currentTile;
+	UTileComponent** TileInDir = currentTile->adjecentTiles.Find(FacingDir);
+	if (TileInDir && (*TileInDir)->Visitor)
+	{
+		ABaseEnemy* enemy = Cast<ABaseEnemy>((*TileInDir)->Visitor);
+		if (enemy)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Enemy Pushed."));
+			playerChar->Mana -= playerChar->gameManagerRef->ManaCosts[Push];
+			enemy->Push(FacingDir);
+		}
+	}
 }
 
 void APA3PlayerController::OnAttackPressed()
 {
 	APA3Character* playerChar = Cast<APA3Character>(GetCharacter());
-	auto playerFacing = GetPlayerRotationCardinal();
+	auto FacingDir = GetPlayerRotationCardinal();
+
+	UTileComponent** TileInDir = playerChar->currentTile->adjecentTiles.Find(FacingDir);
+	if (TileInDir && (*TileInDir)->Visitor)
+	{
+		ABaseEnemy* enemy = Cast<ABaseEnemy>((*TileInDir)->Visitor);
+		if (enemy)
+		{
+			enemy->DamageEnemy(playerChar->MeleaDamage);
+		}
+	}
+
 }
 
 void APA3PlayerController::MovePlayerToTile(UTileComponent* i_TargetTile)

@@ -7,6 +7,7 @@
 #include "TileBoardComponent.h"
 #include "TileType.h"
 #include "GameManager.h"
+#include "BasePickup.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
@@ -108,6 +109,16 @@ void APA3Character::Tick(float DeltaSeconds)
 			CursorToWorld->SetWorldRotation(CursorR);
 		}
 	}
+}
+
+bool APA3Character::EquipWeapon(ABasePickup* i_pickup)
+{
+	if (i_pickup->weaponType == Spear && EquipedWeapon == None)
+	{
+		EquipedWeapon = Spear;
+		return true;
+	}
+	return false;
 }
 
 void APA3Character::DamagePlayer()

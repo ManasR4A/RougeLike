@@ -8,6 +8,7 @@
 #include "PA3Character.h"
 
 #include "BaseEnemy.h"
+#include "BasePickup.h"
 #include "WarriorEnemy.h"
 #include "ArcherEnemy.h"
 
@@ -45,43 +46,6 @@ void ATileBoardGenerator::BeginPlay()
 	gameManagerRef->tileBoard = tileBoard;
 	gameManagerRef->playerCharecterRef = Cast<APA3Character>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	gameManagerRef->PostTileBoardGeneration();
-}
-
-int32 ATileBoardGenerator::SpawnEnemies(URoomComponent* i_TargetRoom)
-{
-	int32 targetEnemyCount = i_TargetRoom->roomDeapth + 1;
-	int32 EnemiesSpawned = 0;
-
-	for (EnemiesSpawned = 0; EnemiesSpawned < targetEnemyCount; EnemiesSpawned++)
-	{
-		UTileComponent* spawnTile = GetSpawnTile(i_TargetRoom);
-		if (spawnTile)
-		{
-			if (!SpawnEnemy(spawnTile, Warrior))
-			{
-				EnemiesSpawned--;
-			}
-		}
-		else
-			EnemiesSpawned--;
-	}
-	return EnemiesSpawned;
-}
-
-UTileComponent* ATileBoardGenerator::GetSpawnTile(URoomComponent* i_TargetRoom)
-{
-	int32 enemySpawnTileTries= 0;
-	while (enemySpawnTileTries < maxTries)
-	{
-		enemySpawnTileTries++;
-		int32 randTileIndex = UKismetMathLibrary::RandomIntegerInRange(0, i_TargetRoom->tiles.Num() - 1);
-		UTileComponent* tile = i_TargetRoom->tiles[randTileIndex];
-		if (tile->tileType == Floor && !tile->Visitor)
-		{
-			return tile;
-		}
-	}
-	return nullptr;
 }
 
 bool ATileBoardGenerator::SpawnEnemy(UTileComponent* i_TargetTile, TEnumAsByte<EEnemyType> i_EnemyType)
@@ -134,6 +98,97 @@ bool ATileBoardGenerator::SpawnEnemy(UTileComponent* i_TargetTile, TEnumAsByte<E
 		return false;
 
 	}
+}
+
+int32 ATileBoardGenerator::SpawnEnemies(URoomComponent* i_TargetRoom)
+{
+	int32 targetEnemyCount = i_TargetRoom->roomDeapth + 1;
+	int32 EnemiesSpawned = 0;
+
+	for (EnemiesSpawned = 0; EnemiesSpawned < targetEnemyCount; EnemiesSpawned++)
+	{
+		UTileComponent* spawnTile = GetSpawnTile(i_TargetRoom);
+		if (spawnTile)
+		{
+			if (!SpawnEnemy(spawnTile, Warrior))
+			{
+				EnemiesSpawned--;
+			}
+		}
+		else
+			EnemiesSpawned--;
+	}
+	return EnemiesSpawned;
+}
+
+UTileComponent* ATileBoardGenerator::GetSpawnTile(URoomComponent* i_TargetRoom)
+{
+	int32 enemySpawnTileTries= 0;
+	while (enemySpawnTileTries < maxTries)
+	{
+		enemySpawnTileTries++;
+		int32 randTileIndex = UKismetMathLibrary::RandomIntegerInRange(0, i_TargetRoom->tiles.Num() - 1);
+		UTileComponent* tile = i_TargetRoom->tiles[randTileIndex];
+		if (tile->tileType == Floor && !tile->Visitor)
+		{
+			return tile;
+		}
+	}
+	return nullptr;
+}
+
+int32 ATileBoardGenerator::GetAdjesentTiles(UTileComponent* i_Tile)
+{
+	URoomComponent* parentRoom = i_Tile->parentRoom;
+
+	// get i_Tile coords
+	FVector tileCoords = FVector((parentRoom->roomOrigin + (i_Tile->roomLocation * worldScaler)), 0.f);
+
+	// get all 4 direction coords
+	FVector up, down, left, right;
+	up = tileCoords + FVector(0.f, -worldScaler, 0.f);
+	down = tileCoords + FVector(0.f, worldScaler, 0.f);
+	left = tileCoords + FVector(-worldScaler, 0.f, 0.f);
+	right = tileCoords + FVector(worldScaler, 0.f, 0.f);
+
+	// iterate through all tiles in parent room
+	for (auto tile : parentRoom->tiles)
+	{
+		if (tile == i_Tile)
+		{
+			continue;
+		}
+
+		// check if the tile is not wall
+		//if (tile->GetOwner()->FindComponentByClass<UWallComponent>())
+		//{
+		//	continue;
+		//}
+
+		// check if tile loc is any one of 4 coords
+		FVector tileLoc = tile->GetOwner()->GetActorLocation();
+		tileLoc.Z = 0.f;
+		if (tileLoc == up)
+		{
+			i_Tile->adjecentTiles.Add(North, tile);
+		}
+		else if (tileLoc == down)
+		{
+			i_Tile->adjecentTiles.Add(South, tile);
+		}
+		else if (tileLoc == right)
+		{
+			i_Tile->adjecentTiles.Add(East, tile);
+		}
+		else if (tileLoc == left)
+		{
+			i_Tile->adjecentTiles.Add(West, tile);
+		}
+
+	}
+
+	return i_Tile->adjecentTiles.Num();
+
 }
 
 int32 ATileBoardGenerator::GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom)
@@ -234,6 +289,371 @@ bool ATileBoardGenerator::GenerateUpgradeTileInRoom(URoomComponent* i_TargetRoom
 int32 ATileBoardGenerator::GenerateEnemiesInRoom(URoomComponent* i_TargetRoom)
 {
 	return SpawnEnemies(i_TargetRoom);
+}
+
+bool ATileBoardGenerator::GeneratePickupInRoom(URoomComponent* i_TargetRoom)
+{
+	int32 pickupTries = 0;
+	while (pickupTries < maxTries)
+	{
+		int32 randPickupTile = UKismetMathLibrary::RandomIntegerInRange(0, i_TargetRoom->tiles.Num() - 1);
+		UTileComponent* pickupTile = i_TargetRoom->tiles[randPickupTile];
+
+		// if the pickup can be spawned on the selected tile, then spawn and break
+		if (pickupTile->tileType == Floor && !pickupTile->Visitor)
+		{
+			FVector spawnLoc = pickupTile->GetOwner()->GetActorLocation();
+			FRotator spawnRot = FRotator::ZeroRotator;
+			AActor* newPickupActor = GetWorld()->SpawnActor(pickupBP.Get(), &spawnLoc, &spawnRot);
+			newPickupActor->SetActorLocation(pickupTile->GetOwner()->GetActorLocation());
+			pickupTile->Pickup = newPickupActor;
+
+			ABasePickup* newPickup = Cast<ABasePickup>(newPickupActor);
+			if (newPickup)
+			{
+				newPickup->parentTile = pickupTile;
+			}
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+#pragma region Room Generation
+
+void ATileBoardGenerator::Generate()
+{
+	// Generate the initial data and initial room.
+	if (FirstRoom)
+	{
+		// Tile Board Generation
+		FirstRoom = false;
+		FRotator boardRot = GetActorRotation();
+		FVector boardPos = GetActorLocation();
+		AActor* boardActor = GetWorld()->SpawnActor(boardBP.Get(), &boardPos, &boardRot);
+		if (!boardActor)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Board Actor NOT Generated."));
+			return;
+		}
+
+		tileBoard = boardActor->FindComponentByClass<UTileBoardComponent>();
+		if (!tileBoard)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Board NOT Found."));
+			return;
+		}
+
+#pragma region Spawn Initial Room
+
+		FString roomName;
+		if (StartingRoomFromArray <= roomFileNames.Num())
+			roomName = roomFileNames[StartingRoomFromArray - 1];
+		else
+			roomName = roomFileNames[0];
+
+		FString roomString = LoadRoomString(roomName);
+		URoomComponent* startRoom = CreateRoomComponentFromString(FString("StartRoom"), roomString, FVector2D::ZeroVector);
+		tileBoard->rooms.Add(startRoom);
+		startRoom->roomDeapth = 0;
+
+#pragma endregion
+
+		currentRoom = startRoom;
+	}
+
+	// Check and generation for victory room
+	if (currentRoom->roomDeapth == victoryDeapth - 1)
+	{
+		auto prevRoom = currentRoom;
+		if (prevRoom->doors.Num() > 1)
+		{
+			for (auto door : prevRoom->doors)
+			{
+				if (!door->connectedDoor)
+				{
+					VictoryRoom = true;
+					GenerateRoomAtDoor(door, VictoryRoom);
+				}
+				currentRoom = prevRoom;
+			}
+		}
+		return;
+	}
+
+	// get doors from current room & Geberate Rooms there
+
+	//UDoorComponent* doorToAdvance;
+	//int32 doorTries = 0;
+	//while (!doorToAdvance && doorTries < maxTries)
+	//{
+	//	int32 randDoorINdex = UKismetMathLibrary::RandomIntegerInRange(0, currentRoom->doors.Num() - 1);
+	//	if (!currentRoom->doors[randDoorINdex]->connectedDoor)
+	//	{
+	//		doorToAdvance = currentRoom->doors[randDoorINdex];
+	//		GenerateRoomAtDoor(doorToAdvance, VictoryRoom);
+	//	}
+	//}
+
+	else if (currentRoom->roomDeapth < victoryDeapth - 1)
+	{
+		for (auto door : currentRoom->doors)
+		{
+			int connectedCount = 0;
+
+			// if selected door is already connected
+			if (door->connectedDoor)
+			{
+				connectedCount++;
+				if (connectedCount >= currentRoom->doors.Num())
+				{
+					currentDepth = currentRoom->roomDeapth;
+					// UE_LOG(LogTemp, Warning, TEXT("All Door already connected."));
+					continue;
+				}
+
+				// UE_LOG(LogTemp, Warning, TEXT("Door already connected."));
+				continue;
+			}
+
+			// Generate Room
+			GenerateRoomAtDoor(door, VictoryRoom);
+
+		}
+	}
+
+
+
+	UDoorComponent* connectedDoor;
+	int32 randDoorIndex;
+	int32 doorSelectionTries = 0;
+
+	// loop to get door until proper door is found in current room
+	while (true && doorSelectionTries < maxTries)
+	{
+		doorSelectionTries++;
+		randDoorIndex = UKismetMathLibrary::RandomIntegerInRange(0, currentRoom->doors.Num() - 1);
+		connectedDoor = currentRoom->doors[randDoorIndex]->connectedDoor;
+
+		// condition to check if the selected door is connected to a room forward in the room deapth 
+		// and not the one before the current room/
+		if (connectedDoor && connectedDoor->parentTile->parentRoom->roomDeapth > currentRoom->roomDeapth)
+		{
+			currentRoom = connectedDoor->parentTile->parentRoom;
+			Generate();
+			break;
+		}
+	}
+
+	//for (auto door : prevRoom->doors)
+	//{
+	//	if (door->connectedDoor && currentRoom->roomDeapth == door->connectedDoor->parentTile->parentRoom->roomDeapth - 1)
+	//	{
+	//		count++;
+	//		currentRoom = door->connectedDoor->parentTile->parentRoom;
+	//		
+	//		currentRoom = prevRoom;
+	//	}
+	//}
+	//UE_LOG(LogTemp, Warning, TEXT("Count = %d"), count);
+
+
+}
+
+FString ATileBoardGenerator::LoadRoomString(FString RoomFileName)
+{
+
+	FString fileData;
+	FString dir = FPaths::ProjectContentDir();
+	dir.Append("Assets/Rooms/");
+
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *dir);
+
+	FString filePath = dir.Append(RoomFileName);
+	filePath.Append(".txt");
+
+
+	IPlatformFile& fileManager = FPlatformFileManager::Get().GetPlatformFile();
+
+	if (fileManager.FileExists(*filePath))
+	{
+		if (FFileHelper::LoadFileToString(fileData, *filePath))
+		{
+			return fileData;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("FileManagement: Unable to Load Room file. %s"), *filePath);
+		}
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("FileManagement: Room file not found. %s"), *filePath);
+	}
+
+
+	return FString("Not to be shown.");
+}
+
+URoomComponent* ATileBoardGenerator::CreateRoomComponentFromString(FString roomName, FString roomData, FVector2D roomOriginBoardPosition)
+{
+	// Get rot and pos
+	FRotator roomRot = FRotator::ZeroRotator;
+	FVector roomPos = FVector(worldScaler * roomOriginBoardPosition.X, worldScaler * roomOriginBoardPosition.Y, 0.f);
+
+	// get actor and the component
+	AActor* roomActor = GetWorld()->SpawnActor(roomBP.Get(), &roomPos, &roomRot);
+	if (!roomActor)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Room Actor Spawm failed!"));
+		return nullptr;
+	}
+
+	URoomComponent* room = roomActor->FindComponentByClass<URoomComponent>();
+	if (!room)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Room failed!"));
+		return nullptr;
+	}
+
+	// attach room to tileBoard
+	roomActor->AttachToActor(tileBoard->GetOwner(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Room"));
+
+	// assign room params
+	room->roomOrigin = roomOriginBoardPosition;
+	room->roomName = roomName;
+	//tileBoard->rooms.Add(room); //DO NOT ADD HERE. ONLY ADD AFTER SPAWNED
+
+	// iterate through string and spawn room
+	int x = 0, y = 0;
+	for (int i = 0; i < roomData.Len(); i++)
+	{
+		FString tileChar = roomData.Mid(i, 1);
+
+		if (tileChar == "\n")
+		{
+			x = 0;
+			y++;
+			continue;
+		}
+
+		// check for the tile char and set up params for spawning
+		TEnumAsByte<ETileType> tileType;
+		FRotator tileRotation = FRotator::ZeroRotator;
+
+		if (tileChar == "N")
+		{
+			tileType = ETileType::Door;
+			tileRotation = FRotator::ZeroRotator;
+		}
+		else if (tileChar == "E")
+		{
+			tileType = ETileType::Door;
+			tileRotation = FRotator(0.f, 90.f, 0.f);
+		}
+		else if (tileChar == "S")
+		{
+			tileType = ETileType::Door;
+			tileRotation = FRotator(0.f, 180.f, 0.f);
+		}
+		else if (tileChar == "W")
+		{
+			tileType = ETileType::Door;
+			tileRotation = FRotator(0.f, 270.f, 0.f);
+		}
+		else if (tileChar == "|" || tileChar == "-")
+		{
+			tileType = ETileType::Wall;
+			tileRotation = FRotator::ZeroRotator;
+		}
+		else if (tileChar == " ")
+		{
+			tileType = ETileType::Floor;
+			tileRotation = FRotator::ZeroRotator;
+		}
+		else if (tileChar == "x")
+		{
+			x++;
+			continue;
+		}
+		else if (tileChar == "\r")
+		{
+			continue;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Invalid Symbol in room Data %s"), *tileChar);
+			continue;
+		}
+
+		SpawnTile(tileType, room, FVector2D(x, y), tileRotation);
+
+		x++;
+	}
+
+	return room;
+
+}
+
+UTileComponent* ATileBoardGenerator::SpawnTile(TEnumAsByte<ETileType> tileType, URoomComponent* parentRoom, FVector2D positionInRoom, FRotator tileRotation)
+{
+	if (!tileBPs.Contains(tileType))
+		return nullptr;
+
+	TSubclassOf<class AActor> tileBP = tileBPs[tileType];
+	if (!tileBP)
+		return nullptr;
+
+	// Get rot and pos
+	FRotator tileRot = FRotator::ZeroRotator;
+	FVector tilePos = FVector(worldScaler * positionInRoom.X, worldScaler * positionInRoom.Y, 0.f);
+
+	// get actor and the component
+	AActor* tileActor = GetWorld()->SpawnActor(tileBP.Get(), &tilePos, &tileRot);
+	UTileComponent* tile = tileActor->FindComponentByClass<UTileComponent>();
+	UDoorComponent* door = tileActor->FindComponentByClass<UDoorComponent>();
+	UWallComponent* wall = tileActor->FindComponentByClass<UWallComponent>();
+
+	if (wall)
+	{
+		wall->parentTile = tile;
+	}
+
+	// if the door component was found, update the door component datum
+	if (door)
+	{
+		door->parentTile = tile;
+		float yaw = tileRotation.Yaw;
+
+		if (UKismetMathLibrary::InRange_FloatFloat(yaw, -5.f, 5.f)) { door->doorDirection = EDoorOrientation::North; }
+		else if (UKismetMathLibrary::InRange_FloatFloat(yaw, 85.f, 95.f)) { door->doorDirection = EDoorOrientation::East; }
+		else if (UKismetMathLibrary::InRange_FloatFloat(yaw, 175.f, 185.f)) { door->doorDirection = EDoorOrientation::South; }
+		else if (UKismetMathLibrary::InRange_FloatFloat(yaw, 265.f, 275.f)) { door->doorDirection = EDoorOrientation::West; }
+
+		door->connectedDoor = nullptr;
+		parentRoom->doors.Add(door);
+		// UE_LOG(LogTemp, Warning, TEXT("Door detected and added"));
+
+	}
+
+	// attach to room
+	tileActor->AttachToActor(parentRoom->GetOwner(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Tile"));
+	tileActor->SetActorRotation(tileRotation);
+
+	// setting up the tile data
+	tile->tileType = tileType;
+	tile->parentRoom = parentRoom;
+	tile->roomLocation = positionInRoom;
+	parentRoom->tiles.Add(tile);
+
+	// setting up the parentRoom's startTile
+	if (!parentRoom->startTile && tile->tileType == Floor)
+		parentRoom->startTile = tile;
+
+	return tile;
 }
 
 TEnumAsByte<EDoorOrientation> ATileBoardGenerator::GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir)
@@ -402,6 +822,8 @@ bool ATileBoardGenerator::DestroyRoom(URoomComponent* i_room)
 	return true;
 }
 
+#pragma endregion
+
 // Called every frame
 void ATileBoardGenerator::Tick(float DeltaTime)
 {
@@ -463,6 +885,7 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 			int32 LavaTileCount = GenerateLavaTilesInRoom(currentRoom);
 			bool UpgradeTileSpawned = GenerateUpgradeTileInRoom(currentRoom);
 			int32 EnemyCount = GenerateEnemiesInRoom(currentRoom);
+			GeneratePickupInRoom(currentRoom);
 
 			UE_LOG(LogTemp, Warning, TEXT("LavaTiles = %d"), LavaTileCount);
 			if(UpgradeTileSpawned)
@@ -483,390 +906,5 @@ void ATileBoardGenerator::Tick(float DeltaTime)
 	}
 }
 
-void ATileBoardGenerator::Generate()
-{
-	// Generate the initial data and initial room.
-	if (FirstRoom)
-	{
-		// Tile Board Generation
-		FirstRoom = false;
-		FRotator boardRot = GetActorRotation();
-		FVector boardPos = GetActorLocation();
-		AActor* boardActor = GetWorld()->SpawnActor(boardBP.Get(), &boardPos, &boardRot);
-		if (!boardActor)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Board Actor NOT Generated."));
-			return;
-		}
 
-		tileBoard = boardActor->FindComponentByClass<UTileBoardComponent>();
-		if (!tileBoard)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Board NOT Found."));
-			return;
-		}
-
-		#pragma region Spawn Initial Room
-
-		FString roomName;
-		if (StartingRoomFromArray <= roomFileNames.Num())
-			roomName = roomFileNames[StartingRoomFromArray - 1];
-		else
-			roomName = roomFileNames[0];
-
-		FString roomString = LoadRoomString(roomName);
-		URoomComponent* startRoom = CreateRoomComponentFromString(FString("StartRoom"), roomString, FVector2D::ZeroVector);
-		tileBoard->rooms.Add(startRoom);
-		startRoom->roomDeapth = 0;
-
-		#pragma endregion
-
-		currentRoom = startRoom;
-	}
-	
-	// Check and generation for victory room
-	if (currentRoom->roomDeapth == victoryDeapth - 1)
-	{
-		auto prevRoom = currentRoom;
-		if (prevRoom->doors.Num() > 1)
-		{
-			for (auto door : prevRoom->doors)
-			{
-				if (!door->connectedDoor)
-				{
-					VictoryRoom = true;
-					GenerateRoomAtDoor(door, VictoryRoom);
-				}
-				currentRoom = prevRoom;
-			}
-		}
-		return;
-	}
-
-	// get doors from current room & Geberate Rooms there
-
-	//UDoorComponent* doorToAdvance;
-	//int32 doorTries = 0;
-	//while (!doorToAdvance && doorTries < maxTries)
-	//{
-	//	int32 randDoorINdex = UKismetMathLibrary::RandomIntegerInRange(0, currentRoom->doors.Num() - 1);
-	//	if (!currentRoom->doors[randDoorINdex]->connectedDoor)
-	//	{
-	//		doorToAdvance = currentRoom->doors[randDoorINdex];
-	//		GenerateRoomAtDoor(doorToAdvance, VictoryRoom);
-	//	}
-	//}
-
-	else if (currentRoom->roomDeapth < victoryDeapth - 1)
-	{
-		for (auto door : currentRoom->doors)
-		{
-			int connectedCount = 0;
-
-			// if selected door is already connected
-			if (door->connectedDoor)
-			{
-				connectedCount++;
-				if (connectedCount >= currentRoom->doors.Num())
-				{
-					currentDepth = currentRoom->roomDeapth;
-					// UE_LOG(LogTemp, Warning, TEXT("All Door already connected."));
-					continue;
-				}
-
-				// UE_LOG(LogTemp, Warning, TEXT("Door already connected."));
-				continue;
-			}
-
-			// Generate Room
-			GenerateRoomAtDoor(door, VictoryRoom);
-
-		}
-	}
-
-
-
-	UDoorComponent* connectedDoor;
-	int32 randDoorIndex;
-	int32 doorSelectionTries = 0;
-
-	// loop to get door until proper door is found in current room
-	while (true && doorSelectionTries < maxTries)
-	{
-		doorSelectionTries++;
-		randDoorIndex = UKismetMathLibrary::RandomIntegerInRange(0, currentRoom->doors.Num() - 1);
-		connectedDoor = currentRoom->doors[randDoorIndex]->connectedDoor;
-
-		// condition to check if the selected door is connected to a room forward in the room deapth 
-		// and not the one before the current room/
-		if (connectedDoor && connectedDoor->parentTile->parentRoom->roomDeapth > currentRoom->roomDeapth)
-		{
-			currentRoom = connectedDoor->parentTile->parentRoom;
-			Generate();
-			break;
-		}
-	}
-
-	//for (auto door : prevRoom->doors)
-	//{
-	//	if (door->connectedDoor && currentRoom->roomDeapth == door->connectedDoor->parentTile->parentRoom->roomDeapth - 1)
-	//	{
-	//		count++;
-	//		currentRoom = door->connectedDoor->parentTile->parentRoom;
-	//		
-	//		currentRoom = prevRoom;
-	//	}
-	//}
-	//UE_LOG(LogTemp, Warning, TEXT("Count = %d"), count);
-	
-
-}
-
-FString ATileBoardGenerator::LoadRoomString(FString RoomFileName)
-{
-
-	FString fileData;
-	FString dir = FPaths::ProjectContentDir();
-	dir.Append("Assets/Rooms/");
-
-	//UE_LOG(LogTemp, Warning, TEXT("%s"), *dir);
-		
-	FString filePath = dir.Append(RoomFileName);
-	filePath.Append(".txt");
-	
-
-	IPlatformFile& fileManager = FPlatformFileManager::Get().GetPlatformFile();
-
-	if (fileManager.FileExists(*filePath))
-	{
-		if (FFileHelper::LoadFileToString(fileData, *filePath))
-		{
-			return fileData;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("FileManagement: Unable to Load Room file. %s"), *filePath);
-		}
-
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("FileManagement: Room file not found. %s"), *filePath);
-	}
-
-
-	return FString("Not to be shown.");
-}
-
-URoomComponent* ATileBoardGenerator::CreateRoomComponentFromString(FString roomName, FString roomData, FVector2D roomOriginBoardPosition)
-{
-	// Get rot and pos
-	FRotator roomRot = FRotator::ZeroRotator;
-	FVector roomPos = FVector(worldScaler * roomOriginBoardPosition.X, worldScaler * roomOriginBoardPosition.Y, 0.f);
-
-	// get actor and the component
-	AActor* roomActor = GetWorld()->SpawnActor(roomBP.Get(), &roomPos, &roomRot);
-	if (!roomActor)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Room Actor Spawm failed!"));
-		return nullptr;
-	}
-
-	URoomComponent* room = roomActor->FindComponentByClass<URoomComponent>();
-	if (!room)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Room failed!"));
-		return nullptr;
-	}
-
-	// attach room to tileBoard
-	roomActor->AttachToActor(tileBoard->GetOwner(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Room"));
-
-	// assign room params
-	room->roomOrigin = roomOriginBoardPosition;
-	room->roomName = roomName;
-	//tileBoard->rooms.Add(room); //DO NOT ADD HERE. ONLY ADD AFTER SPAWNED
-	
-	// iterate through string and spawn room
-	int x = 0, y = 0;
-	for (int i = 0; i < roomData.Len(); i++)
-	{
-		FString tileChar = roomData.Mid(i, 1);
-
-		if (tileChar == "\n")
-		{
-			x = 0;
-			y++;
-			continue;
-		}
-
-		// check for the tile char and set up params for spawning
-		TEnumAsByte<ETileType> tileType;
-		FRotator tileRotation = FRotator::ZeroRotator;
-
-		if (tileChar == "N")
-		{
-			tileType = ETileType::Door;
-			tileRotation = FRotator::ZeroRotator;
-		}
-		else if (tileChar == "E")
-		{
-			tileType = ETileType::Door;
-			tileRotation = FRotator(0.f, 90.f, 0.f);
-		}
-		else if (tileChar == "S")
-		{
-			tileType = ETileType::Door;
-			tileRotation = FRotator(0.f, 180.f, 0.f);
-		}
-		else if (tileChar == "W")
-		{
-			tileType = ETileType::Door;
-			tileRotation = FRotator(0.f, 270.f, 0.f);
-		}
-		else if (tileChar == "|" || tileChar == "-")
-		{
-			tileType = ETileType::Wall;
-			tileRotation = FRotator::ZeroRotator;
-		}
-		else if (tileChar == " ")
-		{
-			tileType = ETileType::Floor;
-			tileRotation = FRotator::ZeroRotator;
-		}
-		else if (tileChar == "x")
-		{
-			x++;
-			continue;
-		}
-		else if (tileChar == "\r")
-		{
-			continue;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Invalid Symbol in room Data %s"), *tileChar);
-			continue;
-		}
-
-		SpawnTile(tileType, room, FVector2D(x, y), tileRotation);
-
-		x++;
-	}
-
-	return room;
-
-}
-
-int32 ATileBoardGenerator::GetAdjesentTiles(UTileComponent* i_Tile)
-{
-	URoomComponent* parentRoom = i_Tile->parentRoom;
-
-	// get i_Tile coords
-	FVector tileCoords = FVector((parentRoom->roomOrigin + (i_Tile->roomLocation * worldScaler)), 0.f);
-
-	// get all 4 direction coords
-	FVector up, down, left, right;
-	up = tileCoords + FVector(0.f, -worldScaler, 0.f);
-	down = tileCoords + FVector(0.f, worldScaler, 0.f);
-	left = tileCoords + FVector(-worldScaler, 0.f, 0.f);
-	right = tileCoords + FVector(worldScaler, 0.f, 0.f);
-
-	// iterate through all tiles in parent room
-	for (auto tile : parentRoom->tiles)
-	{
-		if (tile == i_Tile)
-		{
-			continue;
-		}
-
-		// check if the tile is not wall
-		//if (tile->GetOwner()->FindComponentByClass<UWallComponent>())
-		//{
-		//	continue;
-		//}
-			
-		// check if tile loc is any one of 4 coords
-		FVector tileLoc = tile->GetOwner()->GetActorLocation();
-		tileLoc.Z = 0.f;
-		if (tileLoc == up)
-		{
-			i_Tile->adjecentTiles.Add(North, tile);
-		}
-		else if (tileLoc == down)
-		{
-			i_Tile->adjecentTiles.Add(South, tile);
-		}
-		else if (tileLoc == right)
-		{
-			i_Tile->adjecentTiles.Add(East, tile);
-		}
-		else if (tileLoc == left)
-		{
-			i_Tile->adjecentTiles.Add(West, tile);
-		}
-			
-	}
-
-	return i_Tile->adjecentTiles.Num();
-
-}
-
-UTileComponent* ATileBoardGenerator::SpawnTile(TEnumAsByte<ETileType> tileType, URoomComponent* parentRoom, FVector2D positionInRoom, FRotator tileRotation)
-{
-	if (!tileBPs.Contains(tileType))
-		return nullptr;
-
-	TSubclassOf<class AActor> tileBP = tileBPs[tileType];
-	if (!tileBP)
-		return nullptr;
-
-	// Get rot and pos
-	FRotator tileRot = FRotator::ZeroRotator;
-	FVector tilePos = FVector(worldScaler * positionInRoom.X, worldScaler * positionInRoom.Y, 0.f);
-
-	// get actor and the component
-	AActor* tileActor = GetWorld()->SpawnActor(tileBP.Get(), &tilePos, &tileRot);
-	UTileComponent* tile = tileActor->FindComponentByClass<UTileComponent>();
-	UDoorComponent* door = tileActor->FindComponentByClass<UDoorComponent>();
-	UWallComponent* wall = tileActor->FindComponentByClass<UWallComponent>();
-
-	if (wall)
-	{
-		wall->parentTile = tile;
-	}
-
-	// if the door component was found, update the door component datum
-	if (door)
-	{
-		door->parentTile = tile;
-		float yaw = tileRotation.Yaw;
-
-		if(UKismetMathLibrary::InRange_FloatFloat(yaw, -5.f, 5.f)) { door->doorDirection = EDoorOrientation::North; }
-		else if (UKismetMathLibrary::InRange_FloatFloat(yaw, 85.f, 95.f)) { door->doorDirection = EDoorOrientation::East; }
-		else if (UKismetMathLibrary::InRange_FloatFloat(yaw, 175.f, 185.f)) { door->doorDirection = EDoorOrientation::South; }
-		else if (UKismetMathLibrary::InRange_FloatFloat(yaw, 265.f, 275.f)) { door->doorDirection = EDoorOrientation::West; }
-
-		door->connectedDoor = nullptr;
-		parentRoom->doors.Add(door);
-		// UE_LOG(LogTemp, Warning, TEXT("Door detected and added"));
-		
-	}
-
-	// attach to room
-	tileActor->AttachToActor(parentRoom->GetOwner(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Tile"));
-	tileActor->SetActorRotation(tileRotation);
-
-	// setting up the tile data
-	tile->tileType = tileType;
-	tile->parentRoom = parentRoom;
-	tile->roomLocation = positionInRoom;
-	parentRoom->tiles.Add(tile);
-
-	// setting up the parentRoom's startTile
-	if (!parentRoom->startTile && tile->tileType == Floor)
-		parentRoom->startTile = tile;
-
-	return tile;
-}
 

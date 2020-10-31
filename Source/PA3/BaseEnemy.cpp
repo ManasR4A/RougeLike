@@ -37,7 +37,7 @@ void ABaseEnemy::Push(TEnumAsByte<EDoorOrientation> i_PushedInDir)
 		UTileComponent* nextTileInDir = this->currentTile->adjecentTiles[i_PushedInDir];
 		
 		// Damage if pushed in Wall
-		if (nextTileInDir->tileType == Wall)
+		if (nextTileInDir->tileType == Wall || nextTileInDir->tileType == Door)
 		{
 			DamageEnemy(1);
 			return;

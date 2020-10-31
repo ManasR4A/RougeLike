@@ -83,6 +83,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
 		TSubclassOf<AArcherEnemy> archerBP;
 
+	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Blueprint Refs")
+		TSubclassOf<class AActor> pickupBP;
+
 	UPROPERTY(EditAnywhere, Category = "Tile Board Generator|Material Refs")
 		UMaterialInterface* VictoryMat;
 
@@ -119,6 +122,7 @@ protected:
 	int32 GenerateLavaTilesInRoom(URoomComponent* i_TargetRoom);
 	bool GenerateUpgradeTileInRoom(URoomComponent* i_TargetRoom);
 	int32 GenerateEnemiesInRoom(URoomComponent* i_TargetRoom);
+	bool GeneratePickupInRoom(URoomComponent* i_TargetRoom);
 
 	// Helper functions for door generation
 	TEnumAsByte<EDoorOrientation> GetOppositeSide(TEnumAsByte<EDoorOrientation> i_doorDir);

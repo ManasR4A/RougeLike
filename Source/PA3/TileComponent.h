@@ -34,6 +34,9 @@ public:
 	UPROPERTY(EditAnywhere)
 		AActor* Visitor;
 
+	UPROPERTY(EditAnywhere)
+		AActor* Pickup;
+
 	UMaterialInterface* FloorMat;
 
 protected:
