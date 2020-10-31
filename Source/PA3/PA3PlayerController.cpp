@@ -113,11 +113,29 @@ void APA3PlayerController::MoveToMouseCursor()
 				if (playerTile->adjecentTiles.FindKey(HitTile) && !HitTile->Visitor && HitTile->tileType != Wall && (HitTile->tileType != Lava || playerChar->FireProtection))
 				{
 					MovePlayerToTile(HitTile);
+
+					// handle pickups on the new tile
 					if (HitTile->Pickup)
 					{
 						ABasePickup* pickup = Cast<ABasePickup>(HitTile->Pickup);
 						pickup->CollectPickup();
 					}
+
+					// if the player has a spear damage the enemy in front if there
+					if (playerChar->EquipedWeapon == Spear)
+					{
+						auto FacingDir = GetPlayerRotationCardinal();
+						UTileComponent** fwdTile = HitTile->adjecentTiles.Find(FacingDir);
+						if (fwdTile && (*fwdTile)->Visitor)
+						{
+							ABaseEnemy* enemy = Cast<ABaseEnemy>((*fwdTile)->Visitor);
+							if (enemy)
+							{
+								enemy->DamageEnemy(enemy->Health);
+							}
+						}
+					}
+
 					playerChar->gameManagerRef->bPlayersTurn = false;
 				}
 				else

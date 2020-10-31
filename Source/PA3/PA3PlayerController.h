@@ -46,6 +46,7 @@ protected:
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
 
+public:
 	/** Input handlers for Jump action. */
 	UFUNCTION(BlueprintCallable, Category = "PA3Controller|InputHandlers")
 	void OnJumpPressed();

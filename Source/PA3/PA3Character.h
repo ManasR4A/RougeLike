@@ -26,6 +26,12 @@ public:
 
 	bool EquipWeapon(class ABasePickup* i_pickup);
 
+	UFUNCTION(BlueprintCallable, Category = "Player|CHEAT")
+		void CHEAT_HEALTH();
+
+	UFUNCTION(BlueprintCallable, Category = "Player|CHEAT")
+		void CHEAT_KILL();
+
 	/** Returns TopDownCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 	/** Returns CameraBoom subobject **/

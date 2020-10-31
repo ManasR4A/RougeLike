@@ -7,7 +7,9 @@
 #include "TileBoardComponent.h"
 #include "TileType.h"
 #include "GameManager.h"
+#include "BaseEnemy.h"
 #include "BasePickup.h"
+#include "RoomComponent.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
@@ -119,6 +121,26 @@ bool APA3Character::EquipWeapon(ABasePickup* i_pickup)
 		return true;
 	}
 	return false;
+}
+
+void APA3Character::CHEAT_HEALTH()
+{
+	this->Health = gameManagerRef->MaxHealth;
+	this->Mana = gameManagerRef->MaxMana;
+	UE_LOG(LogTemp, Warning, TEXT("CHEAT HEALTH REFILL !!!"));
+}
+
+void APA3Character::CHEAT_KILL()
+{
+	// copying array to avoid array mismanagement
+	auto enemyCopy = gameManagerRef->currentRoom->EnemiesInRoom;
+	for (auto enemy : enemyCopy)
+	{
+		enemy->DamageEnemy(enemy->Health);
+	}
+
+	enemyCopy.Empty();
+	UE_LOG(LogTemp, Warning, TEXT("CHEAT KILLED !!!"));
 }
 
 void APA3Character::DamagePlayer()
