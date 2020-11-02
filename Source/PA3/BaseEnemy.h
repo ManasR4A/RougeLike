@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "EnemyBase")
 	virtual	bool CanAttackPlayer(APA3Character* i_playerChar);
 
+	UFUNCTION(BlueprintCallable, Category = "EnemyBase")
+	bool TryMoveInDir(TEnumAsByte<EDoorOrientation> i_dir);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

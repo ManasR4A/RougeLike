@@ -74,6 +74,7 @@ bool ATileBoardGenerator::SpawnEnemy(UTileComponent* i_TargetTile, TEnumAsByte<E
 			spawnedWarrior->currentTile = i_TargetTile;
 			i_TargetTile->Visitor = spawnedWarrior;
 			i_TargetTile->parentRoom->EnemiesInRoom.Add(spawnedWarrior);
+			UE_LOG(LogTemp, Warning, TEXT("warrior spawned."));
 			return true;
 		}
 		break;
@@ -83,7 +84,7 @@ bool ATileBoardGenerator::SpawnEnemy(UTileComponent* i_TargetTile, TEnumAsByte<E
 		spawnedArcher = Cast<AArcherEnemy>(spawnedEnemyActor);
 		if (!spawnedArcher)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to cast spawned enemy to warrior."));
+			UE_LOG(LogTemp, Error, TEXT("Failed to cast spawned enemy to archer."));
 			return false;
 		}
 		else
@@ -91,6 +92,7 @@ bool ATileBoardGenerator::SpawnEnemy(UTileComponent* i_TargetTile, TEnumAsByte<E
 			spawnedArcher->currentTile = i_TargetTile;
 			i_TargetTile->Visitor = spawnedArcher;
 			i_TargetTile->parentRoom->EnemiesInRoom.Add(spawnedArcher);
+			UE_LOG(LogTemp, Warning, TEXT("archer spawned."));
 			return true;
 		}
 		break;
@@ -106,12 +108,24 @@ int32 ATileBoardGenerator::SpawnEnemies(URoomComponent* i_TargetRoom)
 	int32 targetEnemyCount = i_TargetRoom->roomDeapth + 1;
 	int32 EnemiesSpawned = 0;
 
+	// for archer spawning
+	float percent = i_TargetRoom->roomDeapth / 10.f;
+	int32 ArcherCount = UKismetMathLibrary::FFloor(targetEnemyCount * percent);
+
 	for (EnemiesSpawned = 0; EnemiesSpawned < targetEnemyCount; EnemiesSpawned++)
 	{
 		UTileComponent* spawnTile = GetSpawnTile(i_TargetRoom);
 		if (spawnTile)
 		{
-			if (!SpawnEnemy(spawnTile, Warrior))
+			if (targetEnemyCount - EnemiesSpawned <= ArcherCount)
+			{
+				if (!SpawnEnemy(spawnTile, Archer))
+				{
+					EnemiesSpawned--;
+				}
+			}
+
+			else if (!SpawnEnemy(spawnTile, Warrior))
 			{
 				EnemiesSpawned--;
 			}

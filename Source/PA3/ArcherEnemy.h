@@ -24,6 +24,6 @@ public:
 
 	bool TakeTurn(APA3Character* i_playerChar) override;
 
-	bool TryMoveInDir(TEnumAsByte<EDoorOrientation> i_dir);
+	bool FindPlayerInDir(APA3Character* i_playerCharRef, TEnumAsByte<EDoorOrientation> i_Dir);
 
 };

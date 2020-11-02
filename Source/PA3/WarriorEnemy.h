@@ -22,13 +22,10 @@ public:
 
 	AWarriorEnemy();
 
-	//void MoveToTile(UTileComponent* i_TargetTile, bool bTeleport) override;
-
 	bool MoveToPlayer(APA3Character* i_playerChar) override;
 
 	bool CanAttackPlayer(APA3Character* i_playerChar) override;
 		
 	bool TakeTurn(APA3Character* i_playerChar) override;
 
-	bool TryMoveInDir(TEnumAsByte<EDoorOrientation> i_dir);
 };
