@@ -1,8 +1,8 @@
 {
 	"SourceFiles": [
-		"C:\\RougeLike\\Source\\PA3\\PA3.Build.cs",
-		"C:\\RougeLike\\Source\\PA3.Target.cs",
-		"C:\\RougeLike\\Source\\PA3Editor.Target.cs"
+		"C:\\Docs\\EAE-6330\\RougeLike\\Source\\PA3\\PA3.Build.cs",
+		"C:\\Docs\\EAE-6330\\RougeLike\\Source\\PA3.Target.cs",
+		"C:\\Docs\\EAE-6330\\RougeLike\\Source\\PA3Editor.Target.cs"
 	],
 	"EngineVersion": "4.25.4"
 }
